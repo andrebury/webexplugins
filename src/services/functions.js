@@ -104,3 +104,8 @@ export function enviarMensagem(mensagemRef,room,webex){
   })
   mensagemRef.current.value = ''
 }
+
+
+export function createMeeting(room,webex) {
+
+}

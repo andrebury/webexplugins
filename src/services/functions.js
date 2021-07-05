@@ -2,6 +2,16 @@ import { init as initWebex } from 'webex';
 import api from '../services/api'
 import { strict as assert } from 'assert';
 
+
+export const conversorData = (date) => {
+  if (date === undefined || date === '') {
+      return date
+  } else {
+      return date.substring(14,16) + ':' + date.substring(11,13)
+
+  }
+}
+
 export async function token(urlToken){
 
   const data = JSON.stringify({
@@ -82,4 +92,15 @@ export function listasSalas(webex){
     .then((rooms) => {
       return rooms;
     });
+}
+
+export function enviarMensagem(mensagemRef,room,webex){
+  const mensagem = mensagemRef.current.value
+  webex.messages.create({
+    text: mensagem,
+    roomId: room
+  }).then((mensagemReturn) => {
+    console.log('mensagem criada: ' + mensagemReturn)
+  })
+  mensagemRef.current.value = ''
 }

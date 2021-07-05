@@ -1,5 +1,5 @@
-import React,{useState,useRef,useEffect} from "react";
-
+import React,{useRef} from "react";
+import './style.css'
 export function ChatRoom(props){
   const mensagemRef = useRef(null);
 

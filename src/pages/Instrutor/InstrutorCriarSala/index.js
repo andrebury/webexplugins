@@ -1,6 +1,6 @@
 import React, { useEffect, useState,useRef } from "react";
 import {withRouter} from 'react-router-dom'
-import {criarSala,listasSalas, iniciar,enviarMensagem,conversorData} from '../../../services/functions'
+import {criarSala,listasSalas, iniciar,enviarMensagem,conversorData, registrar} from '../../../services/functions'
 import './style.css'
 
 
@@ -13,7 +13,11 @@ const InstrutorCriarSala = withRouter(({history}) => {
   const [webex,setWebex] = useState({})
   const [salaAtiva,setSalaAtiva] = useState(false)
   const [msgRoom,setMsgRoom] = useState([{"id":"","text":"Seja Bem Vindo ao Chat da Sala!","from":"Sistema","time":"00:00"}])
-
+const [classes, setClasses] = useState({
+  "lista-salas":"lista-salas",
+  "video-body":"video-body hidden",
+  "styledButton":"styledButton"
+})
   useEffect(() => {
     function HandleEntry(){
 
@@ -44,23 +48,21 @@ const InstrutorCriarSala = withRouter(({history}) => {
 
   function putChat(event){
     const repetido = msgRoom.find( msg => msg.id === event.data.id );
-    console.log(room)
-    console.log(msgRoom)
-    console.log(event)
 
-    if(event.data.roomId === room.id & repetido === undefined){
+    if(repetido === undefined){
       console.log('entrar chat')
       const from = event.data.personEmail
       const text = event.data.text
       const time = conversorData(event.data.created)
       const id = event.data.id
+      const roomId = event.data.roomId
 
       let msgChatTemp = []
       msgChatTemp = msgRoom
 
       setMsgRoom([])
 
-      msgChatTemp.push({'id':id,'from':from,'text': text,"created":time})
+      msgChatTemp.push({'roomId':roomId,'id':id,'from':from,'text': text,"created":time})
 
       setMsgRoom(msgChatTemp)
 
@@ -96,9 +98,7 @@ const InstrutorCriarSala = withRouter(({history}) => {
 
   }
   function HandleRoomEntry(roomParam){
-    console.log(roomParam)
-    const mensagens = []
-    setMsgRoom(mensagens)
+
     setRoom(roomParam)
     setSalaAtiva(true)
   }
@@ -108,9 +108,26 @@ const InstrutorCriarSala = withRouter(({history}) => {
       return <div className="container-card darker"> <span style={{fontSize:"12px"}}>Sistema</span> <p>Bem Vindo ao Chat. Escreva a mensagem e clique em enviar</p></div>
     }
 
-    const chatObject = props.msgs.map((msg) => <div className="container-card darker" key={msg.id}> <span style={{fontSize:"12px"}}>{msg.from}</span> <p>{msg.text}</p> <span className="time-left">{msg.time}</span> </div>)
+    const msgifRoom = props.msgs.filter((msg) => (msg.roomId === props.roomsetted.id))
+    const chatObject = msgifRoom.map((msg) => <div className="container-card darker" key={msg.id}> <span style={{fontSize:"12px"}}>{msg.from}</span> <p>{msg.text}</p> <span className="time-left">{msg.time}</span> </div>)
 
     return chatObject
+  }
+
+  function prepararVideo(room){
+    setClasses({
+      "lista-salas":"lista-salas hidden",
+      "video-body":"video-body visible",
+      "styledButton": "styledButton hidden"
+  })
+
+  }
+  function esconderVideo(){
+    setClasses({
+      "lista-salas":"lista-salas",
+      "video-body":"video-body hidden",
+      "styledButton":"styledButton"
+    })
   }
 
   return (
@@ -123,26 +140,30 @@ const InstrutorCriarSala = withRouter(({history}) => {
     {/* <ControleCriacao salas={rooms}/> */}
 
     <div>
-      <div><h3>{room ? `Estamos na sala ${room.title}` : ''}</h3></div>
+      <div><h3>{room ? `${room.title}` : ''}</h3></div>
       {/* <div className="cria-sala">
         <h3>Vamos criar uma sala</h3>
         <input ref={nomeSalaRef} placeholder="Nome da sala"></input>
         <button onClick={() => (handleCriarSala(webex))}>Criar</button>
       </div> */}
       <div className="sala-container">
-        <div className="lista-salas">
+        <div className={classes['lista-salas']}>
           <h2>Lista de salas disponíveis</h2>
-          { rooms.map((room) => <div className="sala-info" key={room.id} ><h3 >{room.title}</h3><button onClick={() => (HandleRoomEntry(room))}>Entrar</button></div>)}
+          { rooms.map((room) => <div className="sala-info" key={room.id} ><h3 className="h3-entrasala" onClick={() => (HandleRoomEntry(room))}>{room.title}</h3></div>)}
         </div>
         <div className="chat-container">
         <div className="chat-body">
-          <ChatContainer msgs={msgRoom}/>
+          <ChatContainer msgs={msgRoom} roomsetted={room}/>
 
         </div>
         <div className="chat-tools">
           <textarea ref={mensagemRef}/><button className="styledButton" onClick={() => (enviarMensagem(mensagemRef,room.id,webex))}>Enviar</button>
-          <button className="styledButton" onClick={() => (props.prepararVideo())}>Vídeo</button>
+          <button className={classes['styledButton']} onClick={() => (prepararVideo(room))}>Vídeo</button>
         </div>
+      </div>
+      <div className={classes['video-body']}>
+        <h3>Vídeo</h3>
+        <button className="styledButton" onClick={() => (esconderVideo())}>Voltar</button>
       </div>
 
       </div>

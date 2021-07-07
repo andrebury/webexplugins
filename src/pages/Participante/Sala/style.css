@@ -273,3 +273,34 @@ button:active {
   float: left;
   color: #999;
 }
+
+.videos {
+  display: flex;
+  flex-direction: row;
+
+  width: 90%;
+  height: 90%;
+  margin: 4px;
+}
+.remote-video {
+  width: 70%;
+  height: 400px;
+}
+
+.outros-videos {
+  width: 30%;
+  height: 90%;
+}
+#remote-video {
+  width: 70%;
+  height: 400px;
+}
+
+#local-video {
+  width: 50%;
+  height: 50%;
+}
+#removescreen-video {
+  width: 50%;
+  height: 50%;
+}

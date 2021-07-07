@@ -8,14 +8,21 @@ const Login = withRouter(({history}) => {
 
   // const token = 'YmI5NGFkOTUtNWYyZi00ZWZiLTg0MTUtNmU1NTRmODZjZmQ1OGVlODQ3MzctYTEy_PF84_7458d5d6-c9ff-4f81-968b-b4ae8e35e028';
   const [login, setLogin] = useState(1)
+  const [sala,setSala] = useState('')
 
   useEffect( () => {
+
 
     const  HandleEntry = async () => {
 
 
       //token da url
       const tokenInfoURL = onLoadGetId(window.location.search.slice(1))
+      let salaTemp = tokenInfoURL.sala
+      if(salaTemp){
+        localStorage.setItem('salaInstrutor',salaTemp)
+      }
+
 
       //token do storage
       const tokenStorage = localStorage.getItem('auth')
@@ -24,26 +31,32 @@ const Login = withRouter(({history}) => {
       if(tokenInfoURL){
         setLogin(2)
 
+
         //pega token da api utilizando o token da url
         const posTokenLocal = await token(tokenInfoURL.code)
-
 
         if(posTokenLocal){
           console.log('enviar')
           setLogin(3)
           setTimeout(() => {
-            history.push('/instrutorcriarsala')
+            history.push({
+              pathname: '/instrutorsala',
+            })
           }, 2000);
       }
     }
       //sem token no localstorage e sem token na url params
       if ((tokenStorage === null ||tokenStorage === undefined)){
+
         setTimeout(() => {
           window.location.href = process.env.REACT_APP_LINK_LOGIN
         }, 3000);
       }else{
+
         setTimeout(() => {
-          history.push('/instrutorcriarsala')
+          history.push({
+            pathname: '/instrutorsala',
+          })
         }, 2000);
       }
 

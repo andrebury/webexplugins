@@ -1,6 +1,7 @@
 import { init as initWebex } from 'webex';
 import api from '../services/api'
 import { strict as assert } from 'assert';
+import Jwt from "jsonwebtoken"
 
 
 export const conversorData = (date) => {
@@ -13,7 +14,6 @@ export const conversorData = (date) => {
 }
 
 export async function token(urlToken){
-
   const data = JSON.stringify({
     "code": urlToken,
     "redirect_uri":process.env.REACT_APP_REDIRECT_URI,
@@ -64,13 +64,18 @@ export function iniciar() {
 }
 
 export function registrar(webex){
-  return webex.meetings.register().then(() => {
-    console.log('successfully registered');
+  if(!webex.meetings.registered){
+    return webex.meetings.register().then(() => {
+      console.log('successfully registered');
+      return true
+    }).catch((error) => {
+      console.warn('error registering', error);
+      return false
+    })
+  }else{
     return true
-  }).catch((error) => {
-    console.warn('error registering', error);
-    return false
-  })
+  }
+
 }
 
 
@@ -108,4 +113,92 @@ export function enviarMensagem(mensagemRef,room,webex){
 
 export function createMeeting(room,webex) {
 
+}
+
+export function AuthWToken(token){
+
+}
+
+
+export function joinMeeting(meeting,webex) {
+
+  const resourceId = webex.devicemanager._pairedDevice ?
+    webex.devicemanager._pairedDevice.identity.id :
+    undefined;
+    console.log('resourceId')
+
+    console.log(resourceId)
+    console.log(meeting)
+
+  meeting.join({
+    pin: false,
+    moderator: false,
+    moveToResource: false,
+    resourceId
+  })
+    .then(() => {
+      console.log(meeting.destination ||
+        meeting.sipUri ||
+        meeting.id)
+    });
+
+}
+
+
+export function mediaMeeting(meeting){
+  return meeting.join().then(() => {
+    const mediaSettings = {
+      receiveVideo: true,
+      receiveAudio: true,
+      receiveShare: true,
+      sendVideo: true,
+      sendAudio: true,
+      sendShare: false
+    };
+
+    // Get our local media stream and add it to the meeting
+    return meeting.getMediaStreams(mediaSettings).then((mediaStreams) => {
+      const [localStream, localShare] = mediaStreams;
+
+      meeting.addMedia({
+        localShare,
+        localStream,
+        mediaSettings
+      });
+    });
+  });
+}
+
+
+
+
+
+export function loginJWT(nome,email){
+  var guestToken = ''
+
+  const expiration = Math.floor(new Date() / 1000) + 36000 // 1 hour from now
+  console.log(nome + email)
+
+  const payload = {
+    "sub": nome,
+    "name": email,
+    "iss": process.env.REACT_APP_GUEST_ISSUER_ID,
+    "exp": expiration
+  };
+
+  const decoded = Buffer.from(process.env.REACT_APP_GUEST_SHARED_SECRET, 'base64');
+
+  guestToken = Jwt.sign(payload, decoded, { algorithm: 'HS256', noTimestamp: true });
+
+  console.log(guestToken)
+  localStorage.setItem('authToken',guestToken)
+  return guestToken
+}
+
+
+export function criarMeeting(webex,room){
+  return webex.meetings.create(room)
+    .then((meeting) => {
+      return meeting
+    });
 }

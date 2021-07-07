@@ -98,7 +98,7 @@ const [classes, setClasses] = useState({
 
   }
   function HandleRoomEntry(roomParam){
-
+    console.log(roomParam)
     setRoom(roomParam)
     setSalaAtiva(true)
   }
@@ -162,8 +162,7 @@ const [classes, setClasses] = useState({
         </div>
       </div>
       <div className={classes['video-body']}>
-        <h3>Vídeo</h3>
-        <button className="styledButton" onClick={() => (esconderVideo())}>Voltar</button>
+        <h3>Vídeo</h3><button className="styledButton" onClick={() => (esconderVideo())}>Voltar</button>
       </div>
 
       </div>

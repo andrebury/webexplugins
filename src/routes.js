@@ -4,7 +4,9 @@ import Teste from './pages/Teste'
 import Login from './pages/Login'
 import InstrutorSala from './pages/Instrutor/InstrutorSala';
 import InstrutorCriarSala from './pages/Instrutor/InstrutorCriarSala';
-// import Participante from './pages/Participante';
+import ParticipanteSala from './pages/Participante/Sala';
+import ParticipanteInicio from './pages/Participante/Inicio';
+
 
 export default function Routes(){
 
@@ -25,7 +27,9 @@ export default function Routes(){
               <Route exact path="/" component={Login} />
               <PrivateRoute exact path="/instrutorsala" component={InstrutorSala} />
               <PrivateRoute exact path="/instrutorcriarsala" component={InstrutorCriarSala} />
-              {/* <Route exact path="/participante" component={Participante} /> */}
+              <Route exact path="/participantesala" component={ParticipanteSala} />
+              <Route exact path="/participanteinicio" component={ParticipanteInicio} />
+
               <PrivateRoute exact path="/teste" component={Teste} />
               {/* <Route path="/home" component={Home} /> */}
             </Switch>

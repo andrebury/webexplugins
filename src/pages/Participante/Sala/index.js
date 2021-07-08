@@ -32,7 +32,7 @@ useEffect(() =>{
   console.log('teste')
 
 
-  webexObj.once(`ready`, function() {
+  webexObj.once('ready', function() {
     console.log(guestToken)
     webexObj.authorization.requestAccessTokenFromJwt({jwt: guestToken})
       .then((r) => {
@@ -45,29 +45,38 @@ useEffect(() =>{
             const email = me.displayName
             setDados({"sipemail":sipemail,"email":email})
           })
-          registrar(webexObj).then((resultado) =>{
-            console.log(resultado ? 'Registrado' : 'Erro no registro')
+          webexObj.meetings.register().then(() => {
+            console.log('successfully registered');
+            return true
+          }).catch((error) => {
+            console.warn('error registering', error);
+            return false
+          }).then((result) => {
+            if(result){
+              // webexObj.meetings.on('meetings:ready', (m) =>  (trataNewMeeting(m)));
+              // webexObj.meetings.on('meetings:registered', (m) =>  (trataNewMeeting(m)));
+              console.log('adicionando eventos')
+              webexObj.meetings.on('meeting:added', (m) =>  {
+                const {type} = m;
+                console.log('Tipo: ' + type)
+
+                if ((type === 'INCOMING' || type === 'JOIN')) {
+                  const newMeeting = m.meeting;
+
+                  // alert('incomingsection');
+                  console.log(newMeeting)
+                  joinMeeting(newMeeting,webexObj)
+                  setMeeting(newMeeting)
+                  mediaMeeting(newMeeting)
+                  newMeeting.on('media:ready', (media) => (mediaStart(media)))
+                  newMeeting.on('media:stopped', (media) => (mediaStop(media)))
+                }
+              });
+              webexObj.meetings.on('meeting:removed', (m) => (mediaStop(m)));
+            }
+
           })
 
-          console.log({'meetings': webexObj.meetings.getAllMeetings()})
-
-          webex.rooms.listen()
-          .then(() => {
-            console.log('listening to room events');
-            webex.rooms.on('created', (event) => console.log(`Got a room:created event:\n${event}`));
-            webex.rooms.on('updated', (event) => console.log(`Got a room:updated event:\n${event}`));
-          })
-          .catch((e) => console.error(`Unable to register for room events: ${e}`));
-
-          webexObj.meetings.on('meetings:ready', (m) =>  (trataNewMeeting(m)));
-          webexObj.meetings.on('meetings:registered', (m) =>  (trataNewMeeting(m)));
-          webexObj.meetings.on('meeting:added', (m) =>  (trataNewMeeting(m)));
-
-
-          webexObj.meetings.on('meeting:removed', (media) => {
-            console.log('meeting:removed' + media)
-            mediaStop(media)
-          })
 
 
         }

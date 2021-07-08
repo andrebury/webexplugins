@@ -17,6 +17,7 @@ const Instrutorsala = withRouter(({history}) => {
   const localvideoRef  = useRef(null)
   const remotescreenRef = useRef(null)
   const addRoomRef = useRef(null)
+  const salaTemp = localStorage.getItem('salaInstrutor')
 
   useEffect(() => {
     let isMounted = true
@@ -24,19 +25,21 @@ const Instrutorsala = withRouter(({history}) => {
     function HandleEntry(){
       const webexObj = iniciar()
       setWebex(webexObj)
-      const salaTemp = localStorage.getItem('salaInstrutor')
       setSala(salaTemp)
       console.log(localStorage.getItem('salaInstrutor'))
       registrar(webexObj).then((resultado) =>{
         console.log(resultado ? 'Registrado' : 'Erro no registro')
-        webexObj.rooms.get(salaTemp).then((roomsTemp) =>{
-          console.log(roomsTemp)
-          setRoom(roomsTemp)
-          webexObj.memberships.list({'roomId' : roomsTemp.id}).then((membrosTemp) =>{
-            console.log(membrosTemp.items)
-            setMembros(membrosTemp.items)
+        if(salaTemp){
+          webexObj.rooms.get(salaTemp).then((roomsTemp) =>{
+            console.log(roomsTemp)
+            setRoom(roomsTemp)
+            webexObj.memberships.list({'roomId' : roomsTemp.id}).then((membrosTemp) =>{
+              console.log(membrosTemp.items)
+              setMembros(membrosTemp.items)
+            })
           })
-        })
+        }
+
 
       })
     }
@@ -87,16 +90,15 @@ const Instrutorsala = withRouter(({history}) => {
       joinMeeting(meeting,webex)
       mediaMeeting(meetingTemp)
       meetingTemp.on('media:ready', (media) => {
-        console.log(webex.meetings.getPersonalMeetingRoom())
         mediaStart(media)
 
       })
 
       meetingTemp.on('media:stopped', (media) => {
+
         mediaStop(media)
       })
     })
-
   }
 
 

@@ -64,8 +64,7 @@ export function iniciar() {
 }
 
 export function registrar(webex){
-  console.log(webex.meetings.registered)
-  if(!webex.meetings.registered){
+
     return webex.meetings.register().then(() => {
       console.log('successfully registered');
       return true
@@ -73,10 +72,6 @@ export function registrar(webex){
       console.warn('error registering', error);
       return false
     })
-  }else{
-    return true
-  }
-
 }
 
 

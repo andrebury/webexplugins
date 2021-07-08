@@ -188,7 +188,6 @@ const Instrutorsala = withRouter(({history}) => {
         <div className="body-container">
           <div className="membros">
             <h3>Membros</h3>
-        <Membros membros={membros}/>
         {
             membros.map((membro) => (<div key={membro.id}>{membro.personDisplayName}</div>))
         }

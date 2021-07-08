@@ -59,25 +59,10 @@ useEffect(() =>{
           })
           .catch((e) => console.error(`Unable to register for room events: ${e}`));
 
-          webexObj.meetings.on('meeting:added', (m) => {
-            const {type} = m;
-            console.log('Tipo: ' + type)
+          webexObj.meetings.on('meetings:ready', (m) =>  (trataNewMeeting(m)));
+          webexObj.meetings.on('meetings:registered', (m) =>  (trataNewMeeting(m)));
+          webexObj.meetings.on('meeting:added', (m) =>  (trataNewMeeting(m)));
 
-            if ((type === 'INCOMING' || type === 'JOIN')) {
-              const newMeeting = m.meeting;
-
-              // alert('incomingsection');
-              console.log(newMeeting)
-              joinMeeting(newMeeting,webexObj)
-              setMeeting(newMeeting)
-              newMeeting.on('media:ready', (media) => (mediaStart('media:ready' + media)))
-              newMeeting.on('media:stopped', (media) => (mediaStop('media:stopped' + media)))
-
-
-              mediaMeeting(newMeeting)
-
-            }
-          });
 
           webexObj.meetings.on('meeting:removed', (media) => {
             console.log('meeting:removed' + media)
@@ -91,6 +76,22 @@ useEffect(() =>{
 
 },[])
 
+  function trataNewMeeting(m){
+    const {type} = m;
+    console.log('Tipo: ' + type)
+
+    if ((type === 'INCOMING' || type === 'JOIN') & !meeting) {
+      const newMeeting = m.meeting;
+
+      // alert('incomingsection');
+      console.log(newMeeting)
+      joinMeeting(newMeeting,webexObj)
+      setMeeting(newMeeting)
+      mediaMeeting(newMeeting)
+      newMeeting.on('media:ready', (media) => (mediaStart(media)))
+      newMeeting.on('media:stopped', (media) => (mediaStop(media)))
+    }
+  }
 
   function mediaStart(media){
     console.log(media)

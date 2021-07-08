@@ -64,6 +64,7 @@ export function iniciar() {
 }
 
 export function registrar(webex){
+  console.log(webex.meetings.registered)
   if(!webex.meetings.registered){
     return webex.meetings.register().then(() => {
       console.log('successfully registered');
@@ -144,6 +145,24 @@ export function joinMeeting(meeting,webex) {
 
 }
 
+export function mediaChange(meeting,media){
+  let mediaDirections = meeting.mediaProperties.mediaDirection
+  mediaDirections[media] = mediaDirections[media] ? false : true
+  console.log(mediaDirections)
+
+  return meeting.getMediaStreams(mediaDirections).then((mediaStreams) => {
+    const [localStream, localShare] = mediaStreams;
+
+    meeting.addMedia({
+      localShare,
+      localStream,
+      mediaDirections
+    })
+    .then((result) => (console.log(result)))
+    .catch((error) => (console.error(error)))
+  })
+}
+
 
 export function mediaMeeting(meeting){
   return meeting.join().then(() => {
@@ -151,7 +170,7 @@ export function mediaMeeting(meeting){
       receiveVideo: true,
       receiveAudio: true,
       receiveShare: true,
-      sendVideo: true,
+      sendVideo: false,
       sendAudio: true,
       sendShare: false
     };
@@ -170,7 +189,32 @@ export function mediaMeeting(meeting){
 }
 
 
+export async function startScreenSharemeeting(meeting) {
 
+  // Using async/await to make code more readable
+  console.log('MeetingControls#startScreenShare()');
+  try {
+    await meeting.shareScreen();
+    console.log('MeetingControls#startScreenShare() :: Successfully started sharing!');
+  }
+  catch (error) {
+    console.log('MeetingControls#startScreenShare() :: Error starting screen share!');
+    console.error(error);
+  }
+}
+
+export async function stopScreenShare(meeting) {
+
+  console.log('MeetingControls#stopScreenShare()');
+  try {
+    await meeting.stopShare();
+    console.log('MeetingControls#stopScreenShare() :: Successfully stopped sharing!');
+  }
+  catch (error) {
+    console.log('MeetingControls#stopScreenShare() :: Error stopping screen share!');
+    console.error(error);
+  }
+}
 
 
 export function loginJWT(nome,email){
@@ -201,4 +245,60 @@ export function criarMeeting(webex,room){
     .then((meeting) => {
       return meeting
     });
+}
+
+
+
+export function mute(meeting){
+  meeting.muteAudio()
+    .then(() => {
+      console.log('MeetingControls#toggleSendAudio() :: Successfully muted audio!');
+    })
+    .catch((handleError) => {
+      console.error("erro no mute" + handleError)
+    });
+}
+
+export function unMute(meeting){
+  meeting.unmuteAudio()
+    .then(() => {
+      console.log('MeetingControls#toggleSendAudio() :: Successfully muted audio!');
+    })
+    .catch((handleError) => {
+      console.error("erro no mute" + handleError)
+    });
+}
+
+
+export function startStopVideo(meeting) {
+
+  const handleError = (error) => {
+    toggleSourcesSendVideoStatus.innerText = 'Error! See console for details.';
+    console.log('MeetingControls#toggleSendVideo() :: Error toggling video!');
+    console.error(error);
+  };
+
+  console.log('MeetingControls#toggleSendVideo()');
+  if (!meeting) {
+    console.log('MeetingControls#toggleSendVideo() :: no valid meeting object!');
+
+    return;
+  }
+
+  if (meeting.isVideoMuted()) {
+    meeting.unmuteVideo()
+      .then(() => {
+        toggleSourcesSendVideoStatus.innerText = 'Toggled video on!';
+        console.log('MeetingControls#toggleSendVideo() :: Successfully unmuted video!');
+      })
+      .catch(handleError);
+  }
+  else {
+    meeting.muteVideo()
+      .then(() => {
+        toggleSourcesSendVideoStatus.innerText = 'Toggled video off!';
+        console.log('MeetingControls#toggleSendVideo() :: Successfully muted video!');
+      })
+      .catch(handleError);
+  }
 }

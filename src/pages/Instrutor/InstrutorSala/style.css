@@ -96,89 +96,53 @@ button:active {
   top: 1px;
 }
 
-.context-info {
-  width: 170px;
-  display: inline-block;
+.body-container {
+  display: flex;
+  flex-direction: row;
 }
 
-.container-meeting {
+.videos {
+  display: flex;
+  flex-direction: row;
+  width: 90%;
+}
+.remote-video {
   width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
+  height: 100%;
 }
 
-.flexvideo {
-  margin: 2px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
-
-#remote-video-div {
-  width: 800px;
-  height: 612px;
-  border-style: solid;
-  border-width: 00.1rem;
-  border-radius: 1.5%;
-}
-#div-videos-secundarios {
+.outros-videos {
+  width: 20%;
   display: flex;
   flex-direction: column;
 }
-
-#local-video-div {
-  width: 200px;
-  height: 200px;
-  border-style: solid;
-  border-radius: 2.5%;
-  border-width: 00.1rem;
-}
-
-#local-screen-div {
-  width: 200px;
-  height: 200px;
-  border-style: solid;
-  border-radius: 2.5%;
-  border-width: 00.1rem;
-}
-
-#remote-screen-div {
-  width: 200px;
-  height: 200px;
-  border-style: solid;
-  border-radius: 2.5%;
-  border-width: 00.1rem;
-}
-
-#div-videos-secundarios #video {
-  width: 200px;
-  height: 200px;
-}
-
-#remote-video-div #remote-video {
-  width: 800px;
-  height: 612px;
-}
-
-.controle-meetings {
+.local-video {
   margin: 4px;
+  width: 100%;
+  height: 100%;
+}
+.removescreen-video {
+  margin: 4px;
+  width: 100%;
+  height: 50%;
+}
+.removescreen-video video {
+  width: 100%;
+  height: 100%;
+}
+
+.membros {
+  width: 10%;
+  margin: 2px;
+}
+.media-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.controles-media {
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
-  text-align: left;
-}
-
-.meeting-card-container {
-  margin: 4px;
-}
-.ferramentas-reuniao {
-  margin: 4px;
-}
-.ferramentas-login {
-  margin: 4px;
-}
-
-.meeting-card {
+  justify-content: space-evenly;
 }

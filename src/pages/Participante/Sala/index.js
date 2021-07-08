@@ -1,6 +1,7 @@
 
 import React,{ useState,useRef, useEffect } from "react";
-import { joinMeeting , loginJWT,mediaMeeting,registrar} from '../../../services/functions'
+import { joinMeeting , loginJWT,mediaMeeting,registrar,mute,unMute,startScreenSharemeeting,startStopVideo,mediaChange} from '../../../services/functions'
+
 import {init as initWebex} from 'webex'
 import { useLocation } from "react-router";
 import './style.css'
@@ -65,19 +66,12 @@ useEffect(() =>{
               setSalaAtiva(true)
               joinMeeting(newMeeting,webexObj)
               setMeeting(newMeeting)
-              newMeeting.on('media:ready', (media) => {
-                if (!media & !salaAtiva) {
-                  return;
-                }
-                mediaStart(media)
+              newMeeting.on('media:ready', (media) => (mediaStart(media)))
+              newMeeting.on('media:stopped', (media) => (mediaStop(media)))
 
-              })
 
-              newMeeting.on('media:stopped', (media) => {
-                setSalaAtiva(false)
-                mediaStop(media)
-              })
               mediaMeeting(newMeeting)
+
             }
           });
 
@@ -97,58 +91,66 @@ useEffect(() =>{
 
   function mediaStart(media){
     console.log(media)
-    if (media.type === 'local') {
-      localvideoRef.current.srcObject = media.stream;
-    }
-    if (media.type === 'remoteVideo') {
-      remotevideoRef.current.srcObject = media.stream;
-    }
-    if (media.type === 'remoteAudio') {
-      remoteAudioRef.current.srcObject = media.stream;
-    }
-    if (media.type === 'remoteShare') {
-      remotescreenRef.current.srcObject = media.stream;
+    switch (media.type) {
+      case 'remoteVideo':
+        remotevideoRef.current.srcObject = media.stream;
+        break;
+      case 'remoteAudio':
+        remoteAudioRef.current.srcObject = media.stream;
+        break;
+      case 'remoteShare':
+        remotescreenRef.current.srcObject = media.stream;
+        break;
     }
   }
+
+
   function mediaStop(media){
-    if (media.type === 'local') {
-      localvideoRef.current.srcObject = null
-    }
-    if (media.type === 'remoteVideo') {
-      remotevideoRef.current.srcObject = null
-    }
-    if (media.type === 'remoteAudio') {
-      remoteAudioRef.current.srcObject = null
-    }
-    if (media.type === 'remoteShare') {
-      remotescreenRef.current.srcObject = null
+    switch (media.type) {
+      case 'remoteVideo':
+        remotevideoRef.current.srcObject = null;
+        break;
+      case 'remoteAudio':
+        remoteAudioRef.current.srcObject = null;
+        break;
+      case 'remoteShare':
+        remotescreenRef.current.srcObject = null;
+        break;
     }
 
   }
 
 
   function FormaMedia(){
-      return (
-        <div className="videos">
-        <div className="remote-video">
-            <legend>Remote Video</legend>
-
-            <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
-            <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
+    return (
+      <div className="videos">
+      <div className="remote-video">
+          <legend>Remote Video</legend>
+          <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
+          <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
+          <div className="controles-media">
+            <button onClick={() => ((mediaChange(meeting,'sendVideo')))}>Habilita Vídeo</button>
+            <button onClick={() => ((mediaChange(meeting,'sendShare')))}>Habilita Vídeo</button>
+            <button onClick={() => (mute(meeting))}>Mute</button>
+            <button onClick={() => (unMute(meeting))}>UnMute</button>
+            <button onClick={() => (startStopVideo())}>Mostrar/Esconder Vídeo</button>
+            <button onClick={() => (startScreenSharemeeting())}>Compartilhar Tela</button>
         </div>
-        <div className="outros-videos">
-
-              <legend>Local Video</legend>
-              <video ref={localvideoRef} id="local-video" autoPlay playsInline />
-
-              <legend>Remote Screenshare</legend>
-              <video ref={remotescreenRef} id="removescreen-video" autoPlay playsInline />
+      </div>
+      <div className="outros-videos">
+          <div className="local-video">
+            <legend>Local Video</legend>
+            <video ref={localvideoRef} id="local-video" autoPlay playsInline />
           </div>
-
+          <div className="removescreen-video">
+            <legend>Remote Screenshare</legend>
+            <video ref={remotescreenRef} id="removescreen-video" autoPlay playsInline />
+          </div>
         </div>
 
-      )
+      </div>
 
+    )
 
   }
 

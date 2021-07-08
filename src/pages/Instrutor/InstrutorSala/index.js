@@ -1,8 +1,8 @@
 import { useEffect } from "react"
 import React,{useState,useRef} from 'react'
-import {criarMeeting, iniciar,registrar,criarSala, joinMeeting,mediaMeeting} from '../../../services/functions'
+import {criarMeeting, iniciar,registrar,criarSala, joinMeeting,mediaMeeting,mute,unMute,startScreenSharemeeting,startStopVideo,mediaChange} from '../../../services/functions'
 import { withRouter } from "react-router-dom"
-
+import './style.css'
 const Instrutorsala = withRouter(({history}) => {
 
   const [sala, setSala] = useState('')
@@ -16,7 +16,7 @@ const Instrutorsala = withRouter(({history}) => {
   const remoteAudioRef = useRef(null)
   const localvideoRef  = useRef(null)
   const remotescreenRef = useRef(null)
-
+  const addRoomRef = useRef(null)
 
   useEffect(() => {
     let isMounted = true
@@ -48,8 +48,10 @@ const Instrutorsala = withRouter(({history}) => {
   },[])
 
   function criaSala(){
-    if(sala){
-      criarSala(webex,sala).then((roomTemp) => {
+    setMembros([])
+    const salatemp = addRoomRef.current.value
+    if(salatemp){
+      criarSala(webex,salatemp).then((roomTemp) => {
         setRoom(roomTemp)
         criarMeeting(webex,roomTemp.id).then((meetingTemp) => {
           setMeeting(meetingTemp)
@@ -69,6 +71,10 @@ const Instrutorsala = withRouter(({history}) => {
         const membrosTemp = membros
         membrosTemp.push(membership)
         setMembros(membrosTemp)
+        addPersonRef.current.value = ''
+      }).catch((error) => {
+        console.log(error)
+        alert('Participate ' + person + ' não pode ser incluído pois ele já está na sala')
       })
     }else{
       alert('Escreva o email do adicionado')
@@ -81,9 +87,7 @@ const Instrutorsala = withRouter(({history}) => {
       joinMeeting(meeting,webex)
       mediaMeeting(meetingTemp)
       meetingTemp.on('media:ready', (media) => {
-        if (!media) {
-          return;
-        }
+
         mediaStart(media)
 
       })
@@ -95,37 +99,51 @@ const Instrutorsala = withRouter(({history}) => {
 
   }
 
+
   function mediaStart(media){
     console.log(media)
-    if (media.type === 'local') {
-      localvideoRef.current.srcObject = media.stream;
-    }
-    if (media.type === 'remoteVideo') {
-      remotevideoRef.current.srcObject = media.stream;
-    }
-    if (media.type === 'remoteAudio') {
-      remoteAudioRef.current.srcObject = media.stream;
-    }
-    if (media.type === 'remoteShare') {
-      remotescreenRef.current.srcObject = media.stream;
+    switch (media.type) {
+      case 'remoteVideo':
+        remotevideoRef.current.srcObject = media.stream;
+        break;
+      case 'remoteAudio':
+        remoteAudioRef.current.srcObject = media.stream;
+        break;
+      case 'remoteShare':
+        remotescreenRef.current.srcObject = media.stream;
+        break;
+      case 'local':
+        localvideoRef.current.srcObject = media.stream;
+        break;
     }
   }
 
 
   function mediaStop(media){
-    if (media.type === 'local') {
-      localvideoRef.current.srcObject = null
-    }
-    if (media.type === 'remoteVideo') {
-      remotevideoRef.current.srcObject = null
-    }
-    if (media.type === 'remoteAudio') {
-      remoteAudioRef.current.srcObject = null
-    }
-    if (media.type === 'remoteShare') {
-      remotescreenRef.current.srcObject = null
+    switch (media.type) {
+      case 'remoteVideo':
+        remotevideoRef.current.srcObject = null;
+        break;
+      case 'remoteAudio':
+        remoteAudioRef.current.srcObject = null;
+        break;
+      case 'remoteShare':
+        remotescreenRef.current.srcObject = null;
+        break;
+      case 'local':
+        localvideoRef.current.srcObject = null;
+        break;
     }
 
+  }
+
+  function mediaVideo(){
+    mediaChange(meeting,'sendVideo')
+
+  }
+
+  function mediaShare(){
+    mediaChange(meeting,'sendShare')
   }
 
   function FormaMedia(){
@@ -133,17 +151,26 @@ const Instrutorsala = withRouter(({history}) => {
       <div className="videos">
       <div className="remote-video">
           <legend>Remote Video</legend>
-
           <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
           <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
+          <div className="controles-media">
+            <button onClick={() => ((mediaVideo(meeting,'sendVideo')))}>Habilita Vídeo</button>
+            <button onClick={() => ((mediaShare(meeting,'sendShare')))}>Habilita Screenshare</button>
+            <button onClick={() => (mute(meeting))}>Mute</button>
+            <button onClick={() => (unMute(meeting))}>UnMute</button>
+            <button onClick={() => (startStopVideo())}>Mostrar/Esconder Vídeo</button>
+            <button onClick={() => (startScreenSharemeeting())}>Compartilhar Tela</button>
+        </div>
       </div>
       <div className="outros-videos">
-
+          <div className="local-video">
             <legend>Local Video</legend>
             <video ref={localvideoRef} id="local-video" autoPlay playsInline />
-
+          </div>
+          <div className="removescreen-video">
             <legend>Remote Screenshare</legend>
             <video ref={remotescreenRef} id="removescreen-video" autoPlay playsInline />
+          </div>
         </div>
 
       </div>
@@ -159,17 +186,26 @@ const Instrutorsala = withRouter(({history}) => {
     <div>
       <div>
       <div><h2>Sala {room ? room.title : sala}</h2></div>
+      <input ref={addRoomRef} placeholder="Digite o nome da sala" />
       <button onClick={() => (criaSala())}>criar sala</button>
       <button onClick={() => (iniciarReuniao())}>Reunir-se</button>
       <button onClick={() => (meeting.leave())}>Deixar Sala</button>
 
 
-      </div>
-      <div>
         <input ref={addPersonRef} placeholder="Adicione pessoas a sala" />
         <button onClick={() => (addPerson())}>Adicionar</button>
+
+      <div/>
+        <div className="body-container">
+          <div className="membros">
+            <h3>Membros</h3>
         <Membros membros={membros}/>
+        </div>
+        <div className="media-container">
         <FormaMedia/>
+
+        </div>
+        </div>
       </div>
     </div>
   )

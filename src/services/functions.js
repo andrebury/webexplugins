@@ -189,6 +189,7 @@ export function mediaMeeting(meeting){
 
     // Get our local media stream and add it to the meeting
     return meeting.getMediaStreams(mediaSettings).then((mediaStreams) => {
+      console.log(mediaStreams)
       const [localStream, localShare] = mediaStreams;
 
       meeting.addMedia({
@@ -285,7 +286,6 @@ export function unMute(meeting){
 export function startStopVideo(meeting) {
 
   const handleError = (error) => {
-    toggleSourcesSendVideoStatus.innerText = 'Error! See console for details.';
     console.log('MeetingControls#toggleSendVideo() :: Error toggling video!');
     console.error(error);
   };
@@ -300,7 +300,6 @@ export function startStopVideo(meeting) {
   if (meeting.isVideoMuted()) {
     meeting.unmuteVideo()
       .then(() => {
-        toggleSourcesSendVideoStatus.innerText = 'Toggled video on!';
         console.log('MeetingControls#toggleSendVideo() :: Successfully unmuted video!');
       })
       .catch(handleError);
@@ -308,9 +307,10 @@ export function startStopVideo(meeting) {
   else {
     meeting.muteVideo()
       .then(() => {
-        toggleSourcesSendVideoStatus.innerText = 'Toggled video off!';
         console.log('MeetingControls#toggleSendVideo() :: Successfully muted video!');
       })
       .catch(handleError);
   }
 }
+
+

@@ -53,26 +53,81 @@ useEffect(() =>{
             return false
           }).then((result) => {
             if(result){
-              // webexObj.meetings.on('meetings:ready', (m) =>  (trataNewMeeting(m)));
-              // webexObj.meetings.on('meetings:registered', (m) =>  (trataNewMeeting(m)));
-              console.log('adicionando eventos')
-              webexObj.meetings.on('meeting:added', (m) =>  {
-                const {type} = m;
-                console.log('Tipo: ' + type)
+              // // webexObj.meetings.on('meetings:ready', (m) =>  (trataNewMeeting(m)));
+              // // webexObj.meetings.on('meetings:registered', (m) =>  (trataNewMeeting(m)));
+              // console.log('adicionando eventos')
+              // webexObj.meetings.on('meeting:added', (m) =>  {
+              //   const {type} = m;
+              //   console.log('Tipo: ' + type)
 
-                if ((type === 'INCOMING' || type === 'JOIN')) {
-                  const newMeeting = m.meeting;
+              //   if ((type === 'INCOMING' || type === 'JOIN')) {
+              //     const newMeeting = m.meeting;
 
-                  // alert('incomingsection');
-                  console.log(newMeeting)
-                  joinMeeting(newMeeting,webexObj)
-                  setMeeting(newMeeting)
-                  mediaMeeting(newMeeting)
-                  newMeeting.on('media:ready', (media) => (mediaStart(media)))
-                  newMeeting.on('media:stopped', (media) => (mediaStop(media)))
-                }
-              });
-              webexObj.meetings.on('meeting:removed', (m) => (mediaStop(m)));
+              //     // alert('incomingsection');
+              //     console.log(newMeeting)
+              //     joinMeeting(newMeeting,webexObj)
+              //     setMeeting(newMeeting)
+              //     mediaMeeting(newMeeting)
+              //     newMeeting.on('media:ready', (media) => (mediaStart(media)))
+              //     newMeeting.on('media:stopped', (media) => (mediaStop(media)))
+              //   }
+              // });
+              // webexObj.meetings.on('meeting:removed', (m) => (mediaStop(m)));
+              // webexObj.meetings.on('meeting:added', (m) =>  {
+              //   const {type} = m;
+              //   console.log('Tipo: ' + type)
+              //   if ((type === 'INCOMING' || type === 'JOIN')) {
+              //     const newMeeting = m.meeting;
+              //     // alert('incomingsection');
+              //     console.log(newMeeting)
+              //     joinMeeting(newMeeting,webexObj)
+              //     setMeeting(newMeeting)
+              //     mediaMeeting(newMeeting)
+              //     newMeeting.on('media:ready', (media) => (mediaStart(media)))
+              //     newMeeting.on('media:stopped', (media) => (mediaStop(media)))
+              //   }
+              // });
+
+              webexObj.meetings.create(location.state.detail.sala).then((meeting) => {
+
+                meeting.join()
+                  .then(() => {
+                    console.log(meeting.destination ||
+                      meeting.sipUri ||
+                      meeting.id)
+                      meeting.on('media:ready', (media) => {
+                        mediaStart(media)})
+                    })
+                      meeting.on('media:stopped', (media) => (mediaStop(media)))
+
+                      meeting.on('meeting:self:lobbyWaiting', () => {
+                        console.log('Aguardando OK')
+                      })
+
+                      meeting.on('meeting:self:guestAdmitted', () => {
+                        console.log('guestAdmitted OK')
+                        if(meeting){
+                          setMeeting(meeting)
+                          mediaMeeting(meeting)
+                        }
+                  });
+                })
+                .catch((err) => {
+                  if (err.joinIntentRequired) {
+                    console.log('Error')
+
+                    meeting.on('meeting:self:lobbyWaiting', () => {
+                      console.log('Aguardando error')
+                    })
+
+                    // join as guest simply makes the call again with moderator parameter
+                    meeting.join(({moderator: false})).then(() => {
+                      console.log('Aceito')
+                      // if host hasn't started the meeting, now you are in the lobby, else if host has started the meeting, you are in the meeting
+                    });
+                  }
+                });
+
             }
 
           })

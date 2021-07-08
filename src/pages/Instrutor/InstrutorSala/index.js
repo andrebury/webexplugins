@@ -11,7 +11,6 @@ const Instrutorsala = withRouter(({history}) => {
   const [meeting, setMeeting] = useState({})
   const [membros,setMembros] = useState([])
 
-  const addPersonRef = useRef(null)
   const remotevideoRef   = useRef(null)
   const remoteAudioRef = useRef(null)
   const localvideoRef  = useRef(null)
@@ -42,13 +41,14 @@ const Instrutorsala = withRouter(({history}) => {
 
 
       })
+
     }
     if(isMounted){
       HandleEntry()
-
     }
-
   },[])
+
+
 
   function criaSala(){
     setMembros([])
@@ -58,37 +58,33 @@ const Instrutorsala = withRouter(({history}) => {
         setRoom(roomTemp)
         criarMeeting(webex,roomTemp.id).then((meetingTemp) => {
           setMeeting(meetingTemp)
+          setInterval(() => {
+            if(meetingTemp){
+              try{
+                let membrosTemp = []
+                const membroKeys = meetingTemp.getMembers().membersCollection.members
+                Object.keys(membroKeys).map((membro) => (membrosTemp.push(membroKeys[membro])))
+
+                console.log(membrosTemp)
+                setMembros(membrosTemp)
+              }catch{
+                console.log('Sem meeting')
+              }
+
+            }
+          }, 15000);
         })
       })
     }
   }
 
-  function addPerson(){
-    const person = addPersonRef.current.value
-    if(person){
-      webex.memberships.create({
-        personEmail: person,
-        roomId: room.id
-      }).then((membership) => {
-        console.log(membership)
-        const membrosTemp = membros
-        membrosTemp.push(membership)
-        setMembros(membrosTemp)
-        addPersonRef.current.value = ''
-      }).catch((error) => {
-        console.log(error)
-        alert('Participate ' + person + ' não pode ser incluído pois ele já está na sala')
-      })
-    }else{
-      alert('Escreva o email do adicionado')
-    }
-  }
 
   function iniciarReuniao(){
     criarMeeting(webex,room.id).then((meetingTemp) => {
       setMeeting(meetingTemp)
       joinMeeting(meeting,webex)
       mediaMeeting(meetingTemp)
+
       meetingTemp.on('media:ready', (media) => {
         mediaStart(media)
 
@@ -122,6 +118,7 @@ const Instrutorsala = withRouter(({history}) => {
 
 
   function mediaStop(media){
+    console.log('fim')
     switch (media.type) {
       case 'remoteVideo':
         remotevideoRef.current.srcObject = null;
@@ -140,66 +137,65 @@ const Instrutorsala = withRouter(({history}) => {
   }
 
 
-  function FormaMedia(){
-    return (
-      <div className="videos">
-      <div className="remote-video">
-          <legend>Remote Video</legend>
-          <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
-          <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
-          <div className="controles-media">
-            {/* <button onClick={() => ((videoChange(meeting)))}>Habilita/Desabilita Vídeo</button>
-            <button onClick={() => ((screenShareChange(meeting)))}>Habilita/Desabilita Screenshare</button> */}
-            <button onClick={() => (mute(meeting))}>Mute</button>
-            <button onClick={() => (unMute(meeting))}>UnMute</button>
-            <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>
-            <button onClick={() => (startScreenSharemeeting(meeting))}>Compartilhar Tela</button>
-        </div>
-      </div>
-      <div className="outros-videos">
-          <div className="local-video">
-            <legend>Local Video</legend>
-            <video ref={localvideoRef} id="local-video" autoPlay playsInline />
-          </div>
-          <div className="removescreen-video">
-            <legend>Remote Screenshare</legend>
-            <video ref={remotescreenRef} id="removescreen-video" autoPlay playsInline />
-          </div>
-        </div>
 
-      </div>
+  function admitir(membroId){
+    if(meeting){
+      meeting.admit(membroId)
+    }
+  }
 
+  function Membros(props){
+    return(
+      props.mem.map((membro) => (<div key={membro.id}>{membro.name}<button hidden={!membro.isInLobby} onClick={() => (admitir(membro.id))}>Admitir</button></div>))
     )
   }
 
-
   return (
     <div>
-      <div>
-      <div><h2>Sala {room ? room.title : sala}</h2></div>
-      <input ref={addRoomRef} placeholder="Digite o nome da sala" />
-      <button onClick={() => (criaSala())}>criar sala</button>
-      <button onClick={() => (iniciarReuniao())}>Reunir-se</button>
-      <button onClick={() => (meeting.leave())}>Deixar Sala</button>
-
-
-        <input ref={addPersonRef} placeholder="Adicione pessoas a sala" />
-        <button onClick={() => (addPerson())}>Adicionar</button>
-
-      <div/>
-        <div className="body-container">
-          <div className="membros">
-            <h3>Membros</h3>
-        {
-            membros.map((membro) => (<div key={membro.id}>{membro.personDisplayName}</div>))
-        }
-        </div>
-        <div className="media-container">
-        <FormaMedia/>
-
-        </div>
-        </div>
-      </div>
+    <div>
+       <div>
+          <h2>Sala {room ? room.title : sala}</h2>
+          <h5>{room ? room.id : sala}</h5>
+       </div>
+       <input ref={addRoomRef} placeholder="Digite o nome da sala" />
+       <button onClick={() => (criaSala())}>criar sala</button>
+       <button onClick={() => (iniciarReuniao())}>Reunir-se</button>
+       <button onClick={() => (meeting.leave())}>Deixar Sala</button>
+       <div/>
+          <div className="body-container">
+             <div className="membros">
+                <h3>Membros</h3>
+                <Membros mem={membros}/>
+             </div>
+             <div className="media-container">
+                <div className="videos">
+                   <div className="remote-video">
+                      <legend>Remote Video</legend>
+                      <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
+                      <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
+                      <div className="controles-media">
+                         {/* <button onClick={() => ((videoChange(meeting)))}>Habilita/Desabilita Vídeo</button>
+                         <button onClick={() => ((screenShareChange(meeting)))}>Habilita/Desabilita Screenshare</button> */}
+                         <button onClick={() => (mute(meeting))}>Mute</button>
+                         <button onClick={() => (unMute(meeting))}>UnMute</button>
+                         <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>
+                         <button onClick={() => (startScreenSharemeeting(meeting))}>Compartilhar Tela</button>
+                      </div>
+                   </div>
+                   <div className="outros-videos">
+                      <div className="local-video">
+                         <legend>Local Video</legend>
+                         <video ref={localvideoRef} id="local-video" autoPlay playsInline />
+                      </div>
+                      <div className="removescreen-video">
+                         <legend>Remote Screenshare</legend>
+                         <video ref={remotescreenRef} id="removescreen-video" autoPlay playsInline />
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </div>
+       </div>
     </div>
   )
 

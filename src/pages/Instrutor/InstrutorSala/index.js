@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import React,{useState,useRef} from 'react'
-import {criarMeeting, iniciar,registrar,criarSala, joinMeeting,mediaMeeting,mute,unMute,startScreenSharemeeting,startStopVideo,mediaChange} from '../../../services/functions'
+import {criarMeeting, iniciar,registrar,criarSala, joinMeeting,mediaMeeting,mute,unMute,startScreenSharemeeting,startStopVideo,screenShareChange,videoChange} from '../../../services/functions'
 import { withRouter } from "react-router-dom"
 import './style.css'
 const Instrutorsala = withRouter(({history}) => {
@@ -87,7 +87,7 @@ const Instrutorsala = withRouter(({history}) => {
       joinMeeting(meeting,webex)
       mediaMeeting(meetingTemp)
       meetingTemp.on('media:ready', (media) => {
-
+        console.log(webex.meetings.getPersonalMeetingRoom())
         mediaStart(media)
 
       })
@@ -137,14 +137,6 @@ const Instrutorsala = withRouter(({history}) => {
 
   }
 
-  function mediaVideo(){
-    mediaChange(meeting,'sendVideo')
-
-  }
-
-  function mediaShare(){
-    mediaChange(meeting,'sendShare')
-  }
 
   function FormaMedia(){
     return (
@@ -154,8 +146,8 @@ const Instrutorsala = withRouter(({history}) => {
           <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
           <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
           <div className="controles-media">
-            <button onClick={() => ((mediaVideo(meeting,'sendVideo')))}>Habilita Vídeo</button>
-            <button onClick={() => ((mediaShare(meeting,'sendShare')))}>Habilita Screenshare</button>
+            {/* <button onClick={() => ((videoChange(meeting)))}>Habilita/Desabilita Vídeo</button>
+            <button onClick={() => ((screenShareChange(meeting)))}>Habilita/Desabilita Screenshare</button> */}
             <button onClick={() => (mute(meeting))}>Mute</button>
             <button onClick={() => (unMute(meeting))}>UnMute</button>
             <button onClick={() => (startStopVideo())}>Mostrar/Esconder Vídeo</button>

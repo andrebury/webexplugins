@@ -127,7 +127,6 @@ export function joinMeeting(meeting,webex) {
     webex.devicemanager._pairedDevice.identity.id :
     undefined;
     console.log('resourceId')
-
     console.log(resourceId)
     console.log(meeting)
 
@@ -145,24 +144,42 @@ export function joinMeeting(meeting,webex) {
 
 }
 
-export function mediaChange(meeting,media){
+
+export function videoChange(meeting){
   let mediaDirections = meeting.mediaProperties.mediaDirection
-  mediaDirections[media] = mediaDirections[media] ? false : true
-  console.log(mediaDirections)
+  //const receiveVideo =  mediaDirections['receiveVideo'] ? false : true
+  const sendVideo = mediaDirections['sendVideo'] ? false : true
+  const receiveVideo = true
+  mediaDirections['sendVideo'] ? false : true
 
-  return meeting.getMediaStreams(mediaDirections).then((mediaStreams) => {
-    const [localStream, localShare] = mediaStreams;
+  meeting.getMediaStreams(mediaDirections).then((mediaStreams) => {
 
-    meeting.addMedia({
-      localShare,
-      localStream,
-      mediaDirections
+    meeting.updateVideo({
+      sendVideo,
+      receiveVideo,
+      mediaStreams
     })
     .then((result) => (console.log(result)))
     .catch((error) => (console.error(error)))
   })
+  .then((result) => (console.log(result)))
+  .catch((error) => (console.error(error)))
 }
 
+export function screenShareChange(meeting){
+  let mediaDirections = meeting.mediaProperties.mediaDirection
+  //const receiveVideo =  mediaDirections['receiveVideo'] ? false : true
+  const sendShare = mediaDirections['sendShare'] ? false : true
+  const receiveShare = true
+
+    meeting.updateShare({
+      sendShare ,
+      receiveShare ,
+    })
+    .then((result) => (console.log(result)))
+    .catch((error) => (console.error(error)))
+
+}
 
 export function mediaMeeting(meeting){
   return meeting.join().then(() => {
@@ -170,7 +187,7 @@ export function mediaMeeting(meeting){
       receiveVideo: true,
       receiveAudio: true,
       receiveShare: true,
-      sendVideo: false,
+      sendVideo: true,
       sendAudio: true,
       sendShare: false
     };

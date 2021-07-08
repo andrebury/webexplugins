@@ -1,6 +1,6 @@
 
 import React,{ useState,useRef, useEffect } from "react";
-import { joinMeeting , loginJWT,mediaMeeting,registrar,mute,unMute,startScreenSharemeeting,startStopVideo,mediaChange} from '../../../services/functions'
+import { joinMeeting , loginJWT,mediaMeeting,registrar,mute,unMute,startScreenSharemeeting,startStopVideo,screenShareChange,videoChange} from '../../../services/functions'
 
 import {init as initWebex} from 'webex'
 import { useLocation } from "react-router";
@@ -101,6 +101,9 @@ useEffect(() =>{
       case 'remoteShare':
         remotescreenRef.current.srcObject = media.stream;
         break;
+      case 'local':
+        localvideoRef.current.srcObject = media.stream;
+        break;
     }
   }
 
@@ -116,6 +119,9 @@ useEffect(() =>{
       case 'remoteShare':
         remotescreenRef.current.srcObject = null;
         break;
+      case 'local':
+        localvideoRef.current.srcObject = null;
+        break;
     }
 
   }
@@ -129,8 +135,8 @@ useEffect(() =>{
           <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
           <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
           <div className="controles-media">
-            <button onClick={() => ((mediaChange(meeting,'sendVideo')))}>Habilita Vídeo</button>
-            <button onClick={() => ((mediaChange(meeting,'sendShare')))}>Habilita Vídeo</button>
+            {/* <button onClick={() => ((videoChange(meeting)))}>Habilita/Desabilita Vídeo</button>
+            <button onClick={() => ((screenShareChange(meeting)))}>Habilita/Desabilita Screen</button> */}
             <button onClick={() => (mute(meeting))}>Mute</button>
             <button onClick={() => (unMute(meeting))}>UnMute</button>
             <button onClick={() => (startStopVideo())}>Mostrar/Esconder Vídeo</button>
@@ -142,12 +148,11 @@ useEffect(() =>{
             <legend>Local Video</legend>
             <video ref={localvideoRef} id="local-video" autoPlay playsInline />
           </div>
-          <div className="removescreen-video">
+          <div className="remotescreen-video">
             <legend>Remote Screenshare</legend>
             <video ref={remotescreenRef} id="removescreen-video" autoPlay playsInline />
           </div>
         </div>
-
       </div>
 
     )

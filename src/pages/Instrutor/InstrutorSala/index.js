@@ -150,8 +150,8 @@ const Instrutorsala = withRouter(({history}) => {
             <button onClick={() => ((screenShareChange(meeting)))}>Habilita/Desabilita Screenshare</button> */}
             <button onClick={() => (mute(meeting))}>Mute</button>
             <button onClick={() => (unMute(meeting))}>UnMute</button>
-            <button onClick={() => (startStopVideo())}>Mostrar/Esconder Vídeo</button>
-            <button onClick={() => (startScreenSharemeeting())}>Compartilhar Tela</button>
+            <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>
+            <button onClick={() => (startScreenSharemeeting(meeting))}>Compartilhar Tela</button>
         </div>
       </div>
       <div className="outros-videos">

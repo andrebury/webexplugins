@@ -9,10 +9,7 @@ import './style.css'
 function ParticipanteSala(props){
   const [webex,setWebex] = useState({})
   const [dados,setDados] = useState({"email":"","sipemail":""})
-  const [sala,setSala] = useState('')
   const [meeting,setMeeting] = useState({})
-  const [salaAtiva,setSalaAtiva] = useState(false)
-
   const remotevideoRef   = useRef(null)
   const remoteAudioRef = useRef(null)
   const localvideoRef  = useRef(null)
@@ -27,10 +24,9 @@ useEffect(() =>{
   let webexObj = {}
   let guestToken = localStorage.getItem('authToken')
   if(!guestToken){
-    console.log(location.state.detail)
-    guestToken = loginJWT(location.state.detail.nome,location.state.detail.email)
+
+    guestToken = loginJWT(location.state.detail.email,location.state.detail.email)
   }
-  setSala(location.state.detail.sala)
 
   webexObj = initWebex()
   console.log('teste')
@@ -54,20 +50,28 @@ useEffect(() =>{
           })
 
           console.log({'meetings': webexObj.meetings.getAllMeetings()})
+
+          webex.rooms.listen()
+          .then(() => {
+            console.log('listening to room events');
+            webex.rooms.on('created', (event) => console.log(`Got a room:created event:\n${event}`));
+            webex.rooms.on('updated', (event) => console.log(`Got a room:updated event:\n${event}`));
+          })
+          .catch((e) => console.error(`Unable to register for room events: ${e}`));
+
           webexObj.meetings.on('meeting:added', (m) => {
             const {type} = m;
             console.log('Tipo: ' + type)
 
-            if ((type === 'INCOMING' || type === 'JOIN') & salaAtiva === false) {
+            if ((type === 'INCOMING' || type === 'JOIN')) {
               const newMeeting = m.meeting;
 
               // alert('incomingsection');
               console.log(newMeeting)
-              setSalaAtiva(true)
               joinMeeting(newMeeting,webexObj)
               setMeeting(newMeeting)
-              newMeeting.on('media:ready', (media) => (mediaStart(media)))
-              newMeeting.on('media:stopped', (media) => (mediaStop(media)))
+              newMeeting.on('media:ready', (media) => (mediaStart('media:ready' + media)))
+              newMeeting.on('media:stopped', (media) => (mediaStop('media:stopped' + media)))
 
 
               mediaMeeting(newMeeting)
@@ -75,9 +79,8 @@ useEffect(() =>{
             }
           });
 
-          webexObj.meetings.on('meeting:leave', (media) => {
-            console.log(media)
-            setSalaAtiva(false)
+          webexObj.meetings.on('meeting:removed', (media) => {
+            console.log('meeting:removed' + media)
             mediaStop(media)
           })
 
@@ -163,7 +166,6 @@ useEffect(() =>{
 
   return (
     <>
-      <div>Sala {sala} </div>
       <div>{dados.email} </div>
       <div>{dados.sipemail} </div>
       <button onClick={() => (meeting.leave())}>Deixar Sala</button>

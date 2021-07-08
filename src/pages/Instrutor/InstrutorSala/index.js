@@ -170,9 +170,6 @@ const Instrutorsala = withRouter(({history}) => {
     )
   }
 
-  function Membros(props){
-    return props.membros.map((membro) => (<div key={membro.id}>{membro.personDisplayName}</div>))
-  }
 
   return (
     <div>
@@ -192,6 +189,9 @@ const Instrutorsala = withRouter(({history}) => {
           <div className="membros">
             <h3>Membros</h3>
         <Membros membros={membros}/>
+        {
+            membros.map((membro) => (<div key={membro.id}>{membro.personDisplayName}</div>))
+        }
         </div>
         <div className="media-container">
         <FormaMedia/>

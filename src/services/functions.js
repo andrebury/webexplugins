@@ -192,7 +192,7 @@ export const mediaSettingsParticipante = {
 export function mediaMeeting(meeting,mediaSettings){
   let currentMediaStreams = [];
 
-  return meeting.getMediaStreams(mediaSettings,audioVideoInputDevices={}).then(([localStream, localShare]) => {
+  return meeting.getMediaStreams(mediaSettings).then(([localStream, localShare]) => {
 
     const [currLocalStream, currLocalShare] = currentMediaStreams;
 

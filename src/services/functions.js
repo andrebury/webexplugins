@@ -182,7 +182,7 @@ export const mediaSettingsParticipante = {
   receiveVideo: true,
   receiveAudio: true,
   receiveShare: true,
-  sendVideo: false,
+  sendVideo: true,
   sendAudio: true,
   sendShare: false
 };
@@ -211,20 +211,15 @@ export function mediaMeeting(meeting,mediaSettings){
 }
 
 //envia media para o webex
-export function addMediaMeeting(meeting,stream,mediaSettings){
+export function addMediaMeeting(meeting,currentMediaStreams,mediaSettings){
+  const [localStream, localShare] = currentMediaStreams;
 
   return meeting.addMedia({
-    localShare:stream.localShare,
-    localStream: stream.localStream,
+    localShare,
+    localStream,
     mediaSettings
   });
 }
-
-
-
-
-
-
 
 
 export async function startScreenSharemeeting(meeting) {

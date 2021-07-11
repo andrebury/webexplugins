@@ -98,7 +98,10 @@ const Instrutorsala = withRouter(({history}) => {
         //getmediaStreams informando a meeting e as configurações para instrutor
 
         mediaMeeting(meetingTemp,mediaSettingsInstrutor).then((currentMediaStreams) => {
-
+          const [localStream] = currentMediaStreams
+          if (localStream) {
+            localvideoRef.current.srcObject = localStream;
+          }
           addMediaMeeting(meetingTemp,currentMediaStreams,mediaSettingsInstrutor).then(() =>{
             meetingTemp.on('media:ready', (media) => (mediaStart(media)))
             meetingTemp.on('media:stopped', (media) => (mediaStop(media)))

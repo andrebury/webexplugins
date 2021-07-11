@@ -41,6 +41,10 @@ function ParticipanteSala(props){
               console.log('guestAdmitted')
 
               mediaMeeting(meetingTemp,mediaSettingsParticipante).then((currentMediaStreams) => {
+                const [localStream] = currentMediaStreams
+                if (localStream) {
+                  localvideoRef.current.srcObject = localStream;
+                }
 
                 addMediaMeeting(meetingTemp,currentMediaStreams,mediaSettingsParticipante).then(() =>{
                   meetingTemp.on('media:ready', (media) => (mediaStart(media)))
@@ -128,6 +132,31 @@ useEffect(() =>{
     }
   }
 
+  function deixarMeeting(){
+    if(remotevideoRef.current.srcObject !== null){
+      remotevideoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+      remotevideoRef.current.srcObject = null;
+    }
+    if(remoteAudioRef.current.srcObject !== null){
+
+      remoteAudioRef.current.srcObject.getTracks().forEach((track) => track.stop());
+      remoteAudioRef.current.srcObject = null;
+    }
+
+    if(remotescreenRef.current.srcObject !== null){
+
+      remotescreenRef.current.srcObject.getTracks().forEach((track) => track.stop());
+      remotescreenRef.current.srcObject = null;
+    }
+
+    if(localvideoRef.current.srcObject !== null){
+
+      localvideoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+      localvideoRef.current.srcObject = null;
+    }
+
+    meeting.leave()
+  }
 
   function FormaMedia(){
     return (
@@ -164,7 +193,7 @@ useEffect(() =>{
     <>
       <div>{dados.email} </div>
       <div>{dados.sipemail} </div>
-      <button onClick={() => (meeting.leave())}>Deixar Sala</button>
+      <button onClick={() => (deixarMeeting())}>Deixar Sala</button>
       <FormaMedia/>
     </>
   )

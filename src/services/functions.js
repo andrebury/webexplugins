@@ -193,12 +193,13 @@ export function mediaMeeting(meeting,mediaSettings){
   let currentMediaStreams = [];
 
   return meeting.getMediaStreams(mediaSettings).then(([localStream, localShare]) => {
+    console.log('MeetingControls#getMediaStreams() :: Successfully got following streams', localStream, localShare);
 
     const [currLocalStream, currLocalShare] = currentMediaStreams;
 
     currentMediaStreams = [localStream || currLocalStream, localShare || currLocalShare];
 
-    return {'currentMediaStreams':currentMediaStreams,'localStream':localStream};
+    return currentMediaStreams
 
   })
   .catch((error) => {

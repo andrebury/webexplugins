@@ -29,31 +29,29 @@ function ParticipanteSala(props){
 
   const location = useLocation();
 
-  function conectaSala(webexObj){
+  function conectaSala(webexObj,sala){
     registrar(webexObj).then((ehRegistrado) => {
       if(ehRegistrado){
-        criarMeeting(webexObj,location.state.detail.sala).then((meetingTemp) => {
+        criarMeeting(webexObj,sala).then((meetingTemp) => {
           setMeeting(meetingTemp)
           joinMeeting(meetingTemp,joinSettingsParticipante).then(() => {
-
+            console.log('Joined')
             meetingTemp.on('meeting:self:lobbyWaiting', () => console.log('Aguardando OK'))
             meetingTemp.on('meeting:self:guestAdmitted', () => {
+              console.log('guestAdmitted')
 
-              mediaMeeting(meetingTemp,mediaSettingsParticipante).then((mediaStreams) => {
+              mediaMeeting(meetingTemp,mediaSettingsParticipante).then((currentMediaStreams) => {
 
-                if (mediaStreams.localStream ) {
-                  localvideoRef.current.srcObject = mediaStreams.localStream ;
-                }
-                addMediaMeeting(meetingTemp,mediaStreams.currentMediaStreams,mediaSettingsParticipante).then(() =>{
+                addMediaMeeting(meetingTemp,currentMediaStreams,mediaSettingsParticipante).then(() =>{
                   meetingTemp.on('media:ready', (media) => (mediaStart(media)))
                   meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
                 })
+              })
             })
           })
         })
-      })
-    }
-  })
+      }
+    })
   }
 
 useEffect(() =>{
@@ -74,7 +72,7 @@ useEffect(() =>{
   webexObj.once('ready', function() {
     console.log(guestToken)
     webexObj.authorization.requestAccessTokenFromJwt({jwt: guestToken})
-      .then((r) => {
+      .then(() => {
         if (webexObj.canAuthorize) {
           console.log('Autenticado')
           setWebex(webexObj)
@@ -84,7 +82,7 @@ useEffect(() =>{
             const email = me.displayName
             setDados({"sipemail":sipemail,"email":email})
           })
-          conectaSala(webexObj)
+          conectaSala(webexObj,location.state.detail.sala)
 
         }
       })
@@ -139,7 +137,7 @@ useEffect(() =>{
           <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
           <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
           <div className="controles-media">
-            <button onClick={() => (meeting.isAudioMuted() ? unNute(meeting) : mute(meeting))}>Mute/UnMute</button>
+            <button onClick={() => (meeting.isAudioMuted() ? unMute(meeting) : mute(meeting))}>Mute/UnMute</button>
             <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>
             <button onClick={() => (startScreenSharemeeting(meeting))}>Compartilhar Tela</button>
         </div>

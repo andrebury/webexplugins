@@ -96,13 +96,10 @@ const Instrutorsala = withRouter(({history}) => {
       //unir ao meeting
       joinMeeting(meeting,joinSettingsInstrutor).then(() => {
         //getmediaStreams informando a meeting e as configurações para instrutor
-        mediaMeeting(meetingTemp,mediaSettingsInstrutor).then((mediaStreams) => {
 
-          if (mediaStreams.localStream ) {
-          localvideoRef.current.srcObject = mediaStreams.localStream ;
-          }
-          //addmedia para enviar o localmediastream ao webex. Assim que a promise for cumprida, ativa event handling para colocar os streams remotos nos quadros de video
-          addMediaMeeting(meetingTemp,mediaStreams.currentMediaStreams,mediaSettingsInstrutor).then(() =>{
+        mediaMeeting(meetingTemp,mediaSettingsInstrutor).then((currentMediaStreams) => {
+
+          addMediaMeeting(meetingTemp,currentMediaStreams,mediaSettingsInstrutor).then(() =>{
             meetingTemp.on('media:ready', (media) => (mediaStart(media)))
             meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
           })
@@ -160,7 +157,7 @@ const Instrutorsala = withRouter(({history}) => {
 
   function Membros(props){
     return(
-      props.mem.map((membro) => (<div key={membro.id}>{membro.name}<button hidden={!membro.isInLobby} onClick={() => (admitir(membro.id))}>Admitir</button></div>))
+      props.mem.map((membro) => (<div key={membro.id}><div>{membro.name}</div><div><button style={membro.isInLobby ? {"visibility":"visible"} : {"visibility":"hidden"}} hidden={!membro.isInLobby} onClick={() => (admitir(membro.id))}>Admitir</button></div></div>))
     )
   }
 
@@ -188,7 +185,7 @@ const Instrutorsala = withRouter(({history}) => {
                       <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
                       <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
                       <div className="controles-media">
-                        <button onClick={() => (meeting.isAudioMuted() ? unNute(meeting) : mute(meeting))}>Mute/UnMute</button>
+                        <button onClick={() => (meeting.isAudioMuted() ? unMute(meeting) : mute(meeting))}>Mute/UnMute</button>
                         <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>
                         <button onClick={() => (startScreenSharemeeting(meeting))}>Compartilhar Tela</button>
                       </div>

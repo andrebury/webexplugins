@@ -1,8 +1,24 @@
 import { useEffect } from "react"
 import React,{useState,useRef} from 'react'
-import {criarMeeting, iniciar,registrar,criarSala, joinMeeting,mediaMeeting,mute,unMute,startScreenSharemeeting,startStopVideo,screenShareChange,videoChange} from '../../../services/functions'
+import {
+  criarMeeting,
+  iniciar,
+  registrar,
+  criarSala,
+  joinMeeting,
+  mediaMeeting,
+  mute,
+  unMute,
+  startScreenSharemeeting,
+  startStopVideo,
+  joinSettingsInstrutor,
+  mediaSettingsInstrutor,
+  addMediaMeeting,
+  resgataMembros } from '../../../services/functions'
+
 import { withRouter } from "react-router-dom"
 import './style.css'
+
 const Instrutorsala = withRouter(({history}) => {
 
   const [sala, setSala] = useState('')
@@ -50,28 +66,22 @@ const Instrutorsala = withRouter(({history}) => {
 
 
 
+
   function criaSala(){
     setMembros([])
     const salatemp = addRoomRef.current.value
     if(salatemp){
       criarSala(webex,salatemp).then((roomTemp) => {
+        //retorna o objeto da sala
         setRoom(roomTemp)
+        //a partir do id da sala, cria uma meeting, mas ainda não se junta a ela
         criarMeeting(webex,roomTemp.id).then((meetingTemp) => {
           setMeeting(meetingTemp)
+          //define intervalo de 15 segundos para executar a função de mostrar os membros da meeting
+          //os participantes que se juntarem a meeting, ficarão no lobby, até o instrutor admiti-los
           setInterval(() => {
-            if(meetingTemp){
-              try{
-                let membrosTemp = []
-                const membroKeys = meetingTemp.getMembers().membersCollection.members
-                Object.keys(membroKeys).map((membro) => (membrosTemp.push(membroKeys[membro])))
-
-                console.log(membrosTemp)
-                setMembros(membrosTemp)
-              }catch{
-                console.log('Sem meeting')
-              }
-
-            }
+            const membrosTemp = resgataMembros(meeting)
+            setMembros(membrosTemp)
           }, 15000);
         })
       })
@@ -81,18 +91,22 @@ const Instrutorsala = withRouter(({history}) => {
 
   function iniciarReuniao(){
     criarMeeting(webex,room.id).then((meetingTemp) => {
+      //define estado para meeting
       setMeeting(meetingTemp)
-      joinMeeting(meeting,webex)
-      mediaMeeting(meetingTemp)
+      //unir ao meeting
+      joinMeeting(meeting,joinSettingsInstrutor).then(() => {
+        //getmediaStreams informando a meeting e as configurações para instrutor
+        mediaMeeting(meetingTemp,mediaSettingsInstrutor).then((mediaStreams) => {
 
-      meetingTemp.on('media:ready', (media) => {
-        mediaStart(media)
-
-      })
-
-      meetingTemp.on('media:stopped', (media) => {
-
-        mediaStop(media)
+          if (mediaStreams.localStream ) {
+          localvideoRef.current.srcObject = mediaStreams.localStream ;
+          }
+          //addmedia para enviar o localmediastream ao webex. Assim que a promise for cumprida, ativa event handling para colocar os streams remotos nos quadros de video
+          addMediaMeeting(meetingTemp,mediaStreams.currentMediaStreams,mediaSettingsInstrutor).then(() =>{
+            meetingTemp.on('media:ready', (media) => (mediaStart(media)))
+            meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
+          })
+        })
       })
     })
   }
@@ -110,9 +124,6 @@ const Instrutorsala = withRouter(({history}) => {
       case 'remoteShare':
         remotescreenRef.current.srcObject = media.stream;
         break;
-      case 'local':
-        localvideoRef.current.srcObject = media.stream;
-        break;
     }
   }
 
@@ -121,19 +132,22 @@ const Instrutorsala = withRouter(({history}) => {
     console.log('fim')
     switch (media.type) {
       case 'remoteVideo':
+        remotevideoRef.current.srcObject.getTracks().forEach((track) => track.stop());
         remotevideoRef.current.srcObject = null;
         break;
       case 'remoteAudio':
+        remoteAudioRef.current.srcObject.getTracks().forEach((track) => track.stop());
         remoteAudioRef.current.srcObject = null;
         break;
       case 'remoteShare':
+        remotescreenRef.current.srcObject.getTracks().forEach((track) => track.stop());
         remotescreenRef.current.srcObject = null;
         break;
       case 'local':
+        localvideoRef.current.srcObject.getTracks().forEach((track) => track.stop());
         localvideoRef.current.srcObject = null;
         break;
     }
-
   }
 
 
@@ -174,8 +188,6 @@ const Instrutorsala = withRouter(({history}) => {
                       <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
                       <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
                       <div className="controles-media">
-                         {/* <button onClick={() => ((videoChange(meeting)))}>Habilita/Desabilita Vídeo</button>
-                         <button onClick={() => ((screenShareChange(meeting)))}>Habilita/Desabilita Screenshare</button> */}
                          <button onClick={() => (mute(meeting))}>Mute</button>
                          <button onClick={() => (unMute(meeting))}>UnMute</button>
                          <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>

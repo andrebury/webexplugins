@@ -39,6 +39,28 @@ export async function token(urlToken){
 
 }
 
+export function loginJWT(nome,email){
+  var guestToken = ''
+
+  const expiration = Math.floor(new Date() / 1000) + 36000 // 1 hour from now
+  console.log(nome + email)
+
+  const payload = {
+    "sub": nome,
+    "name": email,
+    "iss": process.env.REACT_APP_GUEST_ISSUER_ID,
+    "exp": expiration
+  };
+
+  const decoded = Buffer.from(process.env.REACT_APP_GUEST_SHARED_SECRET, 'base64');
+
+  guestToken = Jwt.sign(payload, decoded, { algorithm: 'HS256', noTimestamp: true });
+
+  console.log(guestToken)
+  localStorage.setItem('authToken',guestToken)
+  return guestToken
+}
+
 export function onLoadGetId(query){
   var partes = query.split('&');
   var data = {};
@@ -75,6 +97,11 @@ export function registrar(webex){
 }
 
 
+
+
+
+
+
 export function criarSala(webex,titulo){
   return webex.rooms.create({title: titulo})
   .then((room) => {
@@ -87,6 +114,21 @@ export function criarSala(webex,titulo){
 
 }
 
+export function resgataMembros(meeting){
+  if(meeting){
+    try{
+      let membrosTemp = []
+      const membroKeys = meeting.getMembers().membersCollection.members
+      Object.keys(membroKeys).map((membro) => (membrosTemp.push(membroKeys[membro])))
+
+      console.log(membrosTemp)
+      return membrosTemp
+    }catch{
+      console.log('Sem meeting')
+      return []
+    }
+  }
+}
 
 export function listasSalas(webex){
   return webex.rooms.list()
@@ -107,99 +149,81 @@ export function enviarMensagem(mensagemRef,room,webex){
 }
 
 
-export function createMeeting(room,webex) {
 
+export function joinMeeting(meeting,joinSettings) {
+
+  return meeting.join(joinSettings)
 }
 
-export function AuthWToken(token){
-
+export const joinSettingsInstrutor = {
+  pin: false,
+  moderator: true,
+  moveToResource: false,
+  resourceId:undefined
 }
 
+export const joinSettingsParticipante = {
+  pin: false,
+  moderator: false,
+  moveToResource: false,
+  resourceId:undefined
+}
 
-export function joinMeeting(meeting,webex) {
+export const mediaSettingsInstrutor = {
+  receiveVideo: true,
+  receiveAudio: true,
+  receiveShare: false,
+  sendVideo: true,
+  sendAudio: true,
+  sendShare: false
+};
 
-  const resourceId = webex.devicemanager._pairedDevice ?
-    webex.devicemanager._pairedDevice.identity.id :
-    undefined;
-    console.log('resourceId')
-    console.log(resourceId)
-    console.log(meeting)
+export const mediaSettingsParticipante = {
+  receiveVideo: true,
+  receiveAudio: true,
+  receiveShare: true,
+  sendVideo: false,
+  sendAudio: true,
+  sendShare: false
+};
 
-  meeting.join({
-    pin: false,
-    moderator: false,
-    moveToResource: false,
-    resourceId
+
+//adiciona medias no frontend
+export function mediaMeeting(meeting,mediaSettings){
+  let currentMediaStreams = [];
+
+  return meeting.getMediaStreams(mediaSettings,audioVideoInputDevices={}).then(([localStream, localShare]) => {
+
+    const [currLocalStream, currLocalShare] = currentMediaStreams;
+
+    currentMediaStreams = [localStream || currLocalStream, localShare || currLocalShare];
+
+    return {'currentMediaStreams':currentMediaStreams,'localStream':localStream};
+
   })
-    .then(() => {
-      console.log(meeting.destination ||
-        meeting.sipUri ||
-        meeting.id)
-    });
+  .catch((error) => {
+    console.log('MeetingControls#getMediaStreams() :: Error getting streams!');
+    console.error();
 
-}
-
-
-export function videoChange(meeting){
-  let mediaDirections = meeting.mediaProperties.mediaDirection
-  //const receiveVideo =  mediaDirections['receiveVideo'] ? false : true
-  const sendVideo = mediaDirections['sendVideo'] ? false : true
-  const receiveVideo = true
-  mediaDirections['sendVideo'] ? false : true
-
-  meeting.getMediaStreams(mediaDirections).then((mediaStreams) => {
-
-    meeting.updateVideo({
-      sendVideo,
-      receiveVideo,
-      mediaStreams
-    })
-    .then((result) => (console.log(result)))
-    .catch((error) => (console.error(error)))
-  })
-  .then((result) => (console.log(result)))
-  .catch((error) => (console.error(error)))
-}
-
-export function screenShareChange(meeting){
-  let mediaDirections = meeting.mediaProperties.mediaDirection
-  //const receiveVideo =  mediaDirections['receiveVideo'] ? false : true
-  const sendShare = mediaDirections['sendShare'] ? false : true
-  const receiveShare = true
-
-    meeting.updateShare({
-      sendShare ,
-      receiveShare ,
-    })
-    .then((result) => (console.log(result)))
-    .catch((error) => (console.error(error)))
-
-}
-
-export function mediaMeeting(meeting){
-  return meeting.join().then(() => {
-    const mediaSettings = {
-      receiveVideo: true,
-      receiveAudio: true,
-      receiveShare: true,
-      sendVideo: true,
-      sendAudio: true,
-      sendShare: false
-    };
-
-    // Get our local media stream and add it to the meeting
-    return meeting.getMediaStreams(mediaSettings).then((mediaStreams) => {
-      console.log(mediaStreams)
-      const [localStream, localShare] = mediaStreams;
-
-      meeting.addMedia({
-        localShare,
-        localStream,
-        mediaSettings
-      });
-    });
+    return Promise.reject(error);
   });
 }
+
+//envia media para o webex
+export function addMediaMeeting(meeting,stream,mediaSettings){
+
+  return meeting.addMedia({
+    localShare:stream.localShare,
+    localStream: stream.localStream,
+    mediaSettings
+  });
+}
+
+
+
+
+
+
 
 
 export async function startScreenSharemeeting(meeting) {
@@ -227,29 +251,6 @@ export async function stopScreenShare(meeting) {
     console.log('MeetingControls#stopScreenShare() :: Error stopping screen share!');
     console.error(error);
   }
-}
-
-
-export function loginJWT(nome,email){
-  var guestToken = ''
-
-  const expiration = Math.floor(new Date() / 1000) + 36000 // 1 hour from now
-  console.log(nome + email)
-
-  const payload = {
-    "sub": nome,
-    "name": email,
-    "iss": process.env.REACT_APP_GUEST_ISSUER_ID,
-    "exp": expiration
-  };
-
-  const decoded = Buffer.from(process.env.REACT_APP_GUEST_SHARED_SECRET, 'base64');
-
-  guestToken = Jwt.sign(payload, decoded, { algorithm: 'HS256', noTimestamp: true });
-
-  console.log(guestToken)
-  localStorage.setItem('authToken',guestToken)
-  return guestToken
 }
 
 

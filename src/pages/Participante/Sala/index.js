@@ -1,6 +1,16 @@
 
 import React,{ useState,useRef, useEffect } from "react";
-import { joinMeeting , loginJWT,mediaMeeting,registrar,mute,unMute,startScreenSharemeeting,startStopVideo,screenShareChange,videoChange} from '../../../services/functions'
+import {
+  joinMeeting,
+  loginJWT,
+  mediaMeeting,
+  registrar,
+  mute,
+  unMute,
+  startScreenSharemeeting,
+  startStopVideo,
+  joinSettingsParticipante,
+  mediaSettingsParticipante} from '../../../services/functions'
 
 import {init as initWebex} from 'webex'
 import { useLocation } from "react-router";
@@ -16,6 +26,32 @@ function ParticipanteSala(props){
   const remotescreenRef = useRef(null)
 
   const location = useLocation();
+
+  function conectaSala(webexObj){
+    registrar(webex).then((ehRegistrado) => {
+      if(ehRegistrado){
+        criarMeeting(webexObj,location.state.detail.sala).then((meetingTemp) => {
+          joinMeeting(meetingTemp,joinSettingsParticipante).then(() => {
+
+            meetingTemp.on('meeting:self:lobbyWaiting', () => console.log('Aguardando OK'))
+            meetingTemp.on('meeting:self:guestAdmitted', () => {
+
+              mediaMeeting(meetingTemp,mediaSettingsParticipante).then((mediaStreams) => {
+
+                if (mediaStreams.localStream ) {
+                  localvideoRef.current.srcObject = mediaStreams.localStream ;
+                }
+                addMediaMeeting(meetingTemp,mediaStreams.currentMediaStreams,mediaSettingsParticipante).then(() =>{
+                  meetingTemp.on('media:ready', (media) => (mediaStart(media)))
+                  meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
+                })
+            })
+          })
+        })
+      })
+    }
+  })
+  }
 
 useEffect(() =>{
 
@@ -45,117 +81,13 @@ useEffect(() =>{
             const email = me.displayName
             setDados({"sipemail":sipemail,"email":email})
           })
-          webexObj.meetings.register().then(() => {
-            console.log('successfully registered');
-            return true
-          }).catch((error) => {
-            console.warn('error registering', error);
-            return false
-          }).then((result) => {
-            if(result){
-              // // webexObj.meetings.on('meetings:ready', (m) =>  (trataNewMeeting(m)));
-              // // webexObj.meetings.on('meetings:registered', (m) =>  (trataNewMeeting(m)));
-              // console.log('adicionando eventos')
-              // webexObj.meetings.on('meeting:added', (m) =>  {
-              //   const {type} = m;
-              //   console.log('Tipo: ' + type)
-
-              //   if ((type === 'INCOMING' || type === 'JOIN')) {
-              //     const newMeeting = m.meeting;
-
-              //     // alert('incomingsection');
-              //     console.log(newMeeting)
-              //     joinMeeting(newMeeting,webexObj)
-              //     setMeeting(newMeeting)
-              //     mediaMeeting(newMeeting)
-              //     newMeeting.on('media:ready', (media) => (mediaStart(media)))
-              //     newMeeting.on('media:stopped', (media) => (mediaStop(media)))
-              //   }
-              // });
-              // webexObj.meetings.on('meeting:removed', (m) => (mediaStop(m)));
-              // webexObj.meetings.on('meeting:added', (m) =>  {
-              //   const {type} = m;
-              //   console.log('Tipo: ' + type)
-              //   if ((type === 'INCOMING' || type === 'JOIN')) {
-              //     const newMeeting = m.meeting;
-              //     // alert('incomingsection');
-              //     console.log(newMeeting)
-              //     joinMeeting(newMeeting,webexObj)
-              //     setMeeting(newMeeting)
-              //     mediaMeeting(newMeeting)
-              //     newMeeting.on('media:ready', (media) => (mediaStart(media)))
-              //     newMeeting.on('media:stopped', (media) => (mediaStop(media)))
-              //   }
-              // });
-
-              webexObj.meetings.create(location.state.detail.sala).then((meeting) => {
-
-                meeting.join()
-                  .then(() => {
-                    console.log(meeting.destination ||
-                      meeting.sipUri ||
-                      meeting.id)
-                      meeting.on('media:ready', (media) => {
-                        mediaStart(media)})
-                    })
-                      meeting.on('media:stopped', (media) => (mediaStop(media)))
-
-                      meeting.on('meeting:self:lobbyWaiting', () => {
-                        console.log('Aguardando OK')
-                      })
-
-                      meeting.on('meeting:self:guestAdmitted', () => {
-                        console.log('guestAdmitted OK')
-                        if(meeting){
-                          setMeeting(meeting)
-                          mediaMeeting(meeting)
-                        }
-                  });
-                })
-                .catch((err) => {
-                  if (err.joinIntentRequired) {
-                    console.log('Error')
-
-                    meeting.on('meeting:self:lobbyWaiting', () => {
-                      console.log('Aguardando error')
-                    })
-
-                    // join as guest simply makes the call again with moderator parameter
-                    meeting.join(({moderator: false})).then(() => {
-                      console.log('Aceito')
-                      // if host hasn't started the meeting, now you are in the lobby, else if host has started the meeting, you are in the meeting
-                    });
-                  }
-                });
-
-            }
-
-          })
-
-
+          conectaSala(webexObj)
 
         }
       })
-  });
+  })
 
 },[])
-
-  function trataNewMeeting(m){
-    const {type} = m;
-    console.log('Tipo: ' + type)
-
-    if ((type === 'INCOMING' || type === 'JOIN') & !meeting) {
-      const newMeeting = m.meeting;
-
-      // alert('incomingsection');
-      console.log(newMeeting)
-      joinMeeting(newMeeting,webexObj)
-      setMeeting(newMeeting)
-      mediaMeeting(newMeeting)
-      newMeeting.on('media:ready', (media) => (mediaStart(media)))
-      newMeeting.on('media:stopped', (media) => (mediaStop(media)))
-    }
-  }
 
   function mediaStart(media){
     console.log(media)
@@ -169,29 +101,30 @@ useEffect(() =>{
       case 'remoteShare':
         remotescreenRef.current.srcObject = media.stream;
         break;
-      case 'local':
-        localvideoRef.current.srcObject = media.stream;
-        break;
     }
   }
 
 
   function mediaStop(media){
+    console.log('fim')
     switch (media.type) {
       case 'remoteVideo':
+        remotevideoRef.current.srcObject.getTracks().forEach((track) => track.stop());
         remotevideoRef.current.srcObject = null;
         break;
       case 'remoteAudio':
+        remoteAudioRef.current.srcObject.getTracks().forEach((track) => track.stop());
         remoteAudioRef.current.srcObject = null;
         break;
       case 'remoteShare':
+        remotescreenRef.current.srcObject.getTracks().forEach((track) => track.stop());
         remotescreenRef.current.srcObject = null;
         break;
       case 'local':
+        localvideoRef.current.srcObject.getTracks().forEach((track) => track.stop());
         localvideoRef.current.srcObject = null;
         break;
     }
-
   }
 
 
@@ -203,8 +136,6 @@ useEffect(() =>{
           <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
           <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
           <div className="controles-media">
-            {/* <button onClick={() => ((videoChange(meeting)))}>Habilita/Desabilita Vídeo</button>
-            <button onClick={() => ((screenShareChange(meeting)))}>Habilita/Desabilita Screen</button> */}
             <button onClick={() => (mute(meeting))}>Mute</button>
             <button onClick={() => (unMute(meeting))}>UnMute</button>
             <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>

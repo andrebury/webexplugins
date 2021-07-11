@@ -10,7 +10,9 @@ import {
   startScreenSharemeeting,
   startStopVideo,
   joinSettingsParticipante,
-  mediaSettingsParticipante} from '../../../services/functions'
+  mediaSettingsParticipante,
+  criarMeeting,
+  addMediaMeeting} from '../../../services/functions'
 
 import {init as initWebex} from 'webex'
 import { useLocation } from "react-router";

@@ -33,6 +33,7 @@ function ParticipanteSala(props){
     registrar(webexObj).then((ehRegistrado) => {
       if(ehRegistrado){
         criarMeeting(webexObj,location.state.detail.sala).then((meetingTemp) => {
+          setMeeting(meetingTemp)
           joinMeeting(meetingTemp,joinSettingsParticipante).then(() => {
 
             meetingTemp.on('meeting:self:lobbyWaiting', () => console.log('Aguardando OK'))
@@ -138,8 +139,7 @@ useEffect(() =>{
           <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
           <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
           <div className="controles-media">
-            <button onClick={() => (mute(meeting))}>Mute</button>
-            <button onClick={() => (unMute(meeting))}>UnMute</button>
+            <button onClick={() => (meeting.isAudioMuted() ? unNute(meeting) : mute(meeting))}>Mute/UnMute</button>
             <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>
             <button onClick={() => (startScreenSharemeeting(meeting))}>Compartilhar Tela</button>
         </div>

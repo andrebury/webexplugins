@@ -188,10 +188,9 @@ const Instrutorsala = withRouter(({history}) => {
                       <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
                       <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
                       <div className="controles-media">
-                         <button onClick={() => (mute(meeting))}>Mute</button>
-                         <button onClick={() => (unMute(meeting))}>UnMute</button>
-                         <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>
-                         <button onClick={() => (startScreenSharemeeting(meeting))}>Compartilhar Tela</button>
+                        <button onClick={() => (meeting.isAudioMuted() ? unNute(meeting) : mute(meeting))}>Mute/UnMute</button>
+                        <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>
+                        <button onClick={() => (startScreenSharemeeting(meeting))}>Compartilhar Tela</button>
                       </div>
                    </div>
                    <div className="outros-videos">

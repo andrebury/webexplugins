@@ -28,7 +28,7 @@ function ParticipanteSala(props){
   const location = useLocation();
 
   function conectaSala(webexObj){
-    registrar(webex).then((ehRegistrado) => {
+    registrar(webexObj).then((ehRegistrado) => {
       if(ehRegistrado){
         criarMeeting(webexObj,location.state.detail.sala).then((meetingTemp) => {
           joinMeeting(meetingTemp,joinSettingsParticipante).then(() => {

@@ -109,8 +109,10 @@ const Instrutorsala = withRouter(({history}) => {
           addMediaMeeting(meetingTemp,currentMediaStreamsTemp,mediaSettingsInstrutor).then((addmedia) =>{
             console.log('Media added')
             console.log(addmedia)
-
-          })
+          }).catch((error) => {
+            console.log('MeetingStreams#addMedia() :: Error adding media!');
+            console.error(error);
+          });
         })
       })
     })

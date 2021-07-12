@@ -43,6 +43,7 @@ function ParticipanteSala(props){
               console.log('guestAdmitted')
               meetingTemp.on('media:ready', (media) => (mediaStart(media)))
               meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
+              getUserMedia()
 
               mediaMeeting(meetingTemp,mediaSettingsParticipante,currentMediaStreams).then((currentMediaStreamsTemp) => {
                 setCurrentMediaStreams(currentMediaStreamsTemp)
@@ -54,8 +55,10 @@ function ParticipanteSala(props){
                 addMediaMeeting(meetingTemp,currentMediaStreamsTemp,mediaSettingsParticipante).then((addmedia) =>{
                   console.log('Media added')
                   console.log(addmedia)
-
-                })
+                }).catch((error) => {
+                  console.log('MeetingStreams#addMedia() :: Error adding media!');
+                  console.error(error);
+                });
               })
             })
           })
@@ -104,6 +107,7 @@ useEffect(() =>{
     console.log(media)
     switch (media.type) {
       case 'remoteVideo':
+        console.log(media)
         remotevideoRef.current.srcObject = media.stream;
         break;
       case 'remoteAudio':

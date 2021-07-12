@@ -159,14 +159,16 @@ export const joinSettingsInstrutor = {
   pin: false,
   moderator: false,
   moveToResource: false,
-  resourceId:undefined
+  resourceId:undefined,
+  meetingQuality : {"local" : "HIGH"}
 }
 
 export const joinSettingsParticipante = {
   pin: false,
   moderator: false,
   moveToResource: false,
-  resourceId:undefined
+  resourceId:undefined,
+  meetingQuality : {"local" : "HIGH"}
 }
 
 export const mediaSettingsInstrutor = {

@@ -39,6 +39,7 @@ function ParticipanteSala(props){
           joinMeeting(meetingTemp,joinSettingsParticipante).then(() => {
             console.log('Joined')
             meetingTemp.on('meeting:self:lobbyWaiting', () => console.log('Aguardando OK'))
+
             meetingTemp.on('meeting:self:guestAdmitted', () => {
               console.log('guestAdmitted')
               meetingTemp.on('media:ready', (media) => (mediaStart(media)))

@@ -22,6 +22,8 @@ function ParticipanteSala(props){
   const [webex,setWebex] = useState({})
   const [dados,setDados] = useState({"email":"","sipemail":""})
   const [meeting,setMeeting] = useState({})
+  const [currentMediaStreams,setCurrentMediaStreams] = useState([])
+
   const remotevideoRef   = useRef(null)
   const remoteAudioRef = useRef(null)
   const localvideoRef  = useRef(null)
@@ -39,16 +41,20 @@ function ParticipanteSala(props){
             meetingTemp.on('meeting:self:lobbyWaiting', () => console.log('Aguardando OK'))
             meetingTemp.on('meeting:self:guestAdmitted', () => {
               console.log('guestAdmitted')
+              meetingTemp.on('media:ready', (media) => (mediaStart(media)))
+              meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
 
-              mediaMeeting(meetingTemp,mediaSettingsParticipante).then((currentMediaStreams) => {
-                const [localStream] = currentMediaStreams
+              mediaMeeting(meetingTemp,mediaSettingsParticipante,currentMediaStreams).then((currentMediaStreamsTemp) => {
+                setCurrentMediaStreams(currentMediaStreamsTemp)
+                const [localStream] = currentMediaStreamsTemp
                 if (localStream) {
                   localvideoRef.current.srcObject = localStream;
                 }
 
-                addMediaMeeting(meetingTemp,currentMediaStreams,mediaSettingsParticipante).then(() =>{
-                  meetingTemp.on('media:ready', (media) => (mediaStart(media)))
-                  meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
+                addMediaMeeting(meetingTemp,currentMediaStreamsTemp,mediaSettingsParticipante).then((addmedia) =>{
+                  console.log('Media added')
+                  console.log(addmedia)
+
                 })
               })
             })

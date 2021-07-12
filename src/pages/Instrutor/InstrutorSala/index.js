@@ -26,6 +26,7 @@ const Instrutorsala = withRouter(({history}) => {
   const [room, setRoom] = useState({})
   const [meeting, setMeeting] = useState({})
   const [membros,setMembros] = useState([])
+  const [currentMediaStreams,setCurrentMediaStreams] = useState([])
 
   const remotevideoRef   = useRef(null)
   const remoteAudioRef = useRef(null)
@@ -96,15 +97,19 @@ const Instrutorsala = withRouter(({history}) => {
       //unir ao meeting
       joinMeeting(meeting,joinSettingsInstrutor).then(() => {
         //getmediaStreams informando a meeting e as configurações para instrutor
+        meetingTemp.on('media:ready', (media) => (mediaStart(media)))
+        meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
+        mediaMeeting(meetingTemp,mediaSettingsInstrutor,currentMediaStreams).then((currentMediaStreamsTemp) => {
+          setCurrentMediaStreams(currentMediaStreamsTemp)
 
-        mediaMeeting(meetingTemp,mediaSettingsInstrutor).then((currentMediaStreams) => {
-          const [localStream] = currentMediaStreams
+          const [localStream] = currentMediaStreamsTemp
           if (localStream) {
             localvideoRef.current.srcObject = localStream;
           }
-          addMediaMeeting(meetingTemp,currentMediaStreams,mediaSettingsInstrutor).then(() =>{
-            meetingTemp.on('media:ready', (media) => (mediaStart(media)))
-            meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
+          addMediaMeeting(meetingTemp,currentMediaStreamsTemp,mediaSettingsInstrutor).then((addmedia) =>{
+            console.log('Media added')
+            console.log(addmedia)
+
           })
         })
       })

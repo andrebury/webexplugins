@@ -172,7 +172,7 @@ export const joinSettingsParticipante = {
 export const mediaSettingsInstrutor = {
   receiveVideo: true,
   receiveAudio: true,
-  receiveShare: false,
+  receiveShare: true,
   sendVideo: true,
   sendAudio: true,
   sendShare: false
@@ -189,8 +189,7 @@ export const mediaSettingsParticipante = {
 
 
 //adiciona medias no frontend
-export function mediaMeeting(meeting,mediaSettings){
-  let currentMediaStreams = [];
+export function mediaMeeting(meeting,mediaSettings,currentMediaStreams){
 
   return meeting.getMediaStreams(mediaSettings).then(([localStream, localShare]) => {
     console.log('MeetingControls#getMediaStreams() :: Successfully got following streams', localStream, localShare);
@@ -201,6 +200,9 @@ export function mediaMeeting(meeting,mediaSettings){
 
     return currentMediaStreams
 
+  }).then((currentMediaStreams) =>{
+    console.log('retornando currentmediastreams')
+    return currentMediaStreams
   })
   .catch((error) => {
     console.log('MeetingControls#getMediaStreams() :: Error getting streams!');

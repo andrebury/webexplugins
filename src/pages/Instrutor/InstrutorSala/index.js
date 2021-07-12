@@ -55,10 +55,7 @@ const Instrutorsala = withRouter(({history}) => {
             })
           })
         }
-
-
       })
-
     }
     if(isMounted){
       HandleEntry()
@@ -108,9 +105,8 @@ const Instrutorsala = withRouter(({history}) => {
           if (localStream) {
             localvideoRef.current.srcObject = localStream;
           }
-          addMediaMeeting(meetingTemp,currentMediaStreamsTemp,mediaSettingsInstrutor).then((addmedia) =>{
+          addMediaMeeting(meetingTemp,currentMediaStreamsTemp,mediaSettingsInstrutor).then(() =>{
             console.log('Media added')
-            console.log(addmedia)
           }).catch((error) => {
             console.log('MeetingStreams#addMedia() :: Error adding media!');
             console.error(error);
@@ -122,11 +118,11 @@ const Instrutorsala = withRouter(({history}) => {
 
 
   function mediaStart(media){
+    console.log('media inicio')
+    console.log(media)
     switch (media.type) {
       case 'remoteVideo':
-        console.log(media.getTracks())
-        console.log(media.getAudioTracks())
-        console.log(media.getVideoTracks())
+        console.log(media)
         remotevideoRef.current.srcObject = media.stream;
         break;
       case 'remoteAudio':
@@ -140,7 +136,8 @@ const Instrutorsala = withRouter(({history}) => {
 
 
   function mediaStop(media){
-    console.log('fim')
+    console.log('media fim')
+    console.log(media)
     switch (media.type) {
       case 'remoteVideo':
         remotevideoRef.current.srcObject.getTracks().forEach((track) => track.stop());

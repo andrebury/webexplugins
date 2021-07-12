@@ -51,9 +51,8 @@ function ParticipanteSala(props){
                   localvideoRef.current.srcObject = localStream;
                 }
 
-                addMediaMeeting(meetingTemp,currentMediaStreamsTemp,mediaSettingsParticipante).then((addmedia) =>{
+                addMediaMeeting(meetingTemp,currentMediaStreamsTemp,mediaSettingsParticipante).then(() =>{
                   console.log('Media added')
-                  console.log(addmedia)
                 }).catch((error) => {
                   console.log('MeetingStreams#addMedia() :: Error adding media!');
                   console.error(error);
@@ -95,19 +94,16 @@ useEffect(() =>{
             setDados({"sipemail":sipemail,"email":email})
           })
           conectaSala(webexObj,location.state.detail.sala)
-
         }
       })
   })
-
 },[])
 
   function mediaStart(media){
+    console.log('media inicio')
+    console.log(media)
     switch (media.type) {
       case 'remoteVideo':
-        console.log(media.getTracks())
-        console.log(media.getAudioTracks())
-        console.log(media.getVideoTracks())
         remotevideoRef.current.srcObject = media.stream;
         break;
       case 'remoteAudio':
@@ -121,7 +117,8 @@ useEffect(() =>{
 
 
   function mediaStop(media){
-    console.log('fim')
+    console.log('media fim')
+    console.log(media)
     switch (media.type) {
       case 'remoteVideo':
         remotevideoRef.current.srcObject.getTracks().forEach((track) => track.stop());

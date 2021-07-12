@@ -157,7 +157,7 @@ export function joinMeeting(meeting,joinSettings) {
 
 export const joinSettingsInstrutor = {
   pin: false,
-  moderator: true,
+  moderator: false,
   moveToResource: false,
   resourceId:undefined
 }

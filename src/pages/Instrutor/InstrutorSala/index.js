@@ -78,7 +78,7 @@ const Instrutorsala = withRouter(({history}) => {
           //define intervalo de 15 segundos para executar a função de mostrar os membros da meeting
           //os participantes que se juntarem a meeting, ficarão no lobby, até o instrutor admiti-los
           setInterval(() => {
-            const membrosTemp = resgataMembros(meeting)
+            const membrosTemp = resgataMembros(meetingTemp)
             setMembros(membrosTemp)
           }, 15000);
         })
@@ -92,9 +92,9 @@ const Instrutorsala = withRouter(({history}) => {
       //define estado para meeting
       setMeeting(meetingTemp)
       //unir ao meeting
-      const joinSettingsInstrutorTemp = joinSettingsInstrutor
-      joinSettingsInstrutorTemp['pin'] = meetingTemp.hostId
-      joinMeeting(meeting,joinSettingsInstrutorTemp).then(() => {
+      console.log(meetingTemp)
+
+      joinMeeting(meeting,joinSettingsInstrutor).then(() => {
         //getmediaStreams informando a meeting e as configurações para instrutor
         meetingTemp.on('media:ready', (media) => (mediaStart(media)))
         meetingTemp.on('media:stopped', (media) => (mediaStop(media)))

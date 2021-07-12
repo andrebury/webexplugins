@@ -103,10 +103,11 @@ useEffect(() =>{
 },[])
 
   function mediaStart(media){
-    console.log(media)
     switch (media.type) {
       case 'remoteVideo':
-        console.log(media)
+        console.log(media.getTracks())
+        console.log(media.getAudioTracks())
+        console.log(media.getVideoTracks())
         remotevideoRef.current.srcObject = media.stream;
         break;
       case 'remoteAudio':

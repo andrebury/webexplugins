@@ -95,7 +95,9 @@ const Instrutorsala = withRouter(({history}) => {
       //define estado para meeting
       setMeeting(meetingTemp)
       //unir ao meeting
-      joinMeeting(meeting,joinSettingsInstrutor).then(() => {
+      const joinSettingsInstrutorTemp = joinSettingsInstrutor
+      joinSettingsInstrutorTemp['pin'] = meetingTemp.hostId
+      joinMeeting(meeting,joinSettingsInstrutorTemp).then(() => {
         //getmediaStreams informando a meeting e as configurações para instrutor
         meetingTemp.on('media:ready', (media) => (mediaStart(media)))
         meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
@@ -120,9 +122,11 @@ const Instrutorsala = withRouter(({history}) => {
 
 
   function mediaStart(media){
-    console.log(media)
     switch (media.type) {
       case 'remoteVideo':
+        console.log(media.getTracks())
+        console.log(media.getAudioTracks())
+        console.log(media.getVideoTracks())
         remotevideoRef.current.srcObject = media.stream;
         break;
       case 'remoteAudio':

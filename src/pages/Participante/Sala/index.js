@@ -43,7 +43,6 @@ function ParticipanteSala(props){
               console.log('guestAdmitted')
               meetingTemp.on('media:ready', (media) => (mediaStart(media)))
               meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
-              getUserMedia()
 
               mediaMeeting(meetingTemp,mediaSettingsParticipante,currentMediaStreams).then((currentMediaStreamsTemp) => {
                 setCurrentMediaStreams(currentMediaStreamsTemp)

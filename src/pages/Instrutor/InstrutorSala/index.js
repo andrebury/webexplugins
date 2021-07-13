@@ -85,6 +85,11 @@ const Instrutorsala = withRouter(({history}) => {
 
 
   function iniciarReuniao(){
+    if(!room || !webex){
+      console.log(!room ? 'sem reunião' : 'Erro para se conectar na sala')
+      alert(!room ? 'Crie a sala primeiro' : 'Erro para se conectar na sala')
+      return
+    }
     criarMeeting(webex,room.id).then((meetingTemp) => {
       //define estado para meeting
       setMeeting(meetingTemp)
@@ -92,6 +97,7 @@ const Instrutorsala = withRouter(({history}) => {
       console.log(meetingTemp)
 
       joinMeeting(meetingTemp,joinSettingsInstrutor).then(() => {
+        console.log('joined')
         setInterval(() => {
           const membrosTemp = resgataMembros(meetingTemp)
           setMembros(membrosTemp)

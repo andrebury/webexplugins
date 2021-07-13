@@ -12,7 +12,7 @@ function ParticipanteInicio(){
     const paginaInfo = onLoadGetId(window.location.search.slice(1))
     const roomTemp = paginaInfo.sala
     if(roomTemp){
-      setRoom(roomsTemp)
+      setRoom(roomTemp)
 
     }
   },[])

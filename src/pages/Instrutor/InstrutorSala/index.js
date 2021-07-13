@@ -73,15 +73,12 @@ const Instrutorsala = withRouter(({history}) => {
         //retorna o objeto da sala
         setRoom(roomTemp)
         //a partir do id da sala, cria uma meeting, mas ainda não se junta a ela
-        criarMeeting(webex,roomTemp.id).then((meetingTemp) => {
-          setMeeting(meetingTemp)
-          //define intervalo de 15 segundos para executar a função de mostrar os membros da meeting
-          //os participantes que se juntarem a meeting, ficarão no lobby, até o instrutor admiti-los
-          setInterval(() => {
-            const membrosTemp = resgataMembros(meetingTemp)
-            setMembros(membrosTemp)
-          }, 15000);
-        })
+        // criarMeeting(webex,roomTemp.id).then((meetingTemp) => {
+        //   setMeeting(meetingTemp)
+        //   //define intervalo de 15 segundos para executar a função de mostrar os membros da meeting
+        //   //os participantes que se juntarem a meeting, ficarão no lobby, até o instrutor admiti-los
+
+        // })
       })
     }
   }
@@ -94,7 +91,11 @@ const Instrutorsala = withRouter(({history}) => {
       //unir ao meeting
       console.log(meetingTemp)
 
-      joinMeeting(meeting,joinSettingsInstrutor).then(() => {
+      joinMeeting(meetingTemp,joinSettingsInstrutor).then(() => {
+        setInterval(() => {
+          const membrosTemp = resgataMembros(meetingTemp)
+          setMembros(membrosTemp)
+        }, 15000);
         //getmediaStreams informando a meeting e as configurações para instrutor
         meetingTemp.on('media:ready', (media) => (mediaStart(media)))
         meetingTemp.on('media:stopped', (media) => (mediaStop(media)))
@@ -126,12 +127,12 @@ const Instrutorsala = withRouter(({history}) => {
     switch (media.type) {
       case 'remoteVideo':
         console.log(media)
-        meeting.setMeetingQuality("HIGH")
-        .then(() => {
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+        // meeting.setMeetingQuality("HIGH")
+        // .then(() => {
+        // })
+        // .catch((error) => {
+        //     console.error(error);
+        // });
         remotevideoRef.current.srcObject = media.stream;
         break;
       case 'remoteAudio':
@@ -177,7 +178,7 @@ const Instrutorsala = withRouter(({history}) => {
 
   function Membros(props){
     return(
-      props.mem.map((membro) => (<div key={membro.id}><div>{membro.name}</div><div><button style={membro.isInLobby ? {"visibility":"visible"} : {"visibility":"hidden"}} hidden={!membro.isInLobby} onClick={() => (admitir(membro.id))}>Admitir</button></div></div>))
+      props.mem.map((membro) => (<div key={membro.id}><div>{membro.name}</div><div>{membro.isAudioMuted ? 'Mudo':''}</div><div><button style={membro.isInLobby ? {"visibility":"visible"} : {"visibility":"hidden"}} hidden={!membro.isInLobby} onClick={() => (admitir(membro.id))}>Admitir</button></div></div>))
     )
   }
 
@@ -212,7 +213,9 @@ const Instrutorsala = withRouter(({history}) => {
                       <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
                       <div className="controles-media">
                         <button onClick={() => (meeting.isAudioMuted() ? unMute(meeting) : mute(meeting))}>Mute/UnMute</button>
+                        {meeting ? meeting.isAudioMuted() ? 'Mudo Ligado' : 'Mudo Desligado' : ''}
                         <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>
+                        {meeting ? meeting.isVideoMuted() ? 'Vídeo Ligado' : 'Vídeo Desligado' : ''}
                         <button onClick={() => (startScreenSharemeeting(meeting))}>Compartilhar Tela</button>
                       </div>
                    </div>

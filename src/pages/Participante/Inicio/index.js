@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useEffect, useState} from 'react'
 import { useHistory } from 'react-router-dom'
 import { onLoadGetId } from '../../../services/functions'
 
@@ -8,7 +8,14 @@ function ParticipanteInicio(){
   const [room,setRoom] = useState('')
 
   const history = useHistory()
+  useEffect(() => {
+    const paginaInfo = onLoadGetId(window.location.search.slice(1))
+    const roomTemp = paginaInfo.sala
+    if(roomTemp){
+      setRoom(roomsTemp)
 
+    }
+  },[])
 
 
   function handleEntrar(){

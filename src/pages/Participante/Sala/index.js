@@ -75,7 +75,9 @@ useEffect(() =>{
   // espaco = 820db940-dcde-11eb-b2e2-81cdccaa141a
   let webexObj = {}
   let guestToken = localStorage.getItem('authToken')
-  if(!guestToken){
+  const tokenValido = localStorage.getItem('expiration') > (Math.floor(new Date() / 1000))
+
+  if(!guestToken & tokenValido){
 
     guestToken = loginJWT(location.state.detail.email,location.state.detail.email)
   }
@@ -108,12 +110,12 @@ useEffect(() =>{
     console.log(media)
     switch (media.type) {
       case 'remoteVideo':
-        meeting.setMeetingQuality("HIGH")
-        .then(() => {
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+        // meeting.setMeetingQuality("HIGH")
+        // .then(() => {
+        // })
+        // .catch((error) => {
+        //     console.error(error);
+        // });
         remotevideoRef.current.srcObject = media.stream;
         break;
       case 'remoteAudio':

@@ -42,7 +42,7 @@ export async function token(urlToken){
 export function loginJWT(nome,email){
   var guestToken = ''
 
-  const expiration = Math.floor(new Date() / 1000) + 36000 // 1 hour from now
+  const expiration = Math.floor(new Date() / 1000) + 36000 // 10 hour from now
   console.log(nome + email)
 
   const payload = {
@@ -58,6 +58,8 @@ export function loginJWT(nome,email){
 
   console.log(guestToken)
   localStorage.setItem('authToken',guestToken)
+  localStorage.setItem('expiration',expiration)
+
   return guestToken
 }
 

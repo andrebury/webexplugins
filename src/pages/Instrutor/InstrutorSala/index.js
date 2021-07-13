@@ -7,8 +7,7 @@ import {
   criarSala,
   joinMeeting,
   mediaMeeting,
-  mute,
-  unMute,
+  muteUnMute,
   startScreenSharemeeting,
   startStopVideo,
   joinSettingsInstrutor,
@@ -33,16 +32,17 @@ const Instrutorsala = withRouter(({history}) => {
   const localvideoRef  = useRef(null)
   const remotescreenRef = useRef(null)
   const addRoomRef = useRef(null)
-  const salaTemp = localStorage.getItem('salaInstrutor')
 
   useEffect(() => {
     let isMounted = true
+    console.log(meeting)
 
     function HandleEntry(){
+      const salaTemp = localStorage.getItem('salaInstrutor')
       const webexObj = iniciar()
       setWebex(webexObj)
       setSala(salaTemp)
-      console.log(localStorage.getItem('salaInstrutor'))
+      console.log(salaTemp)
       registrar(webexObj).then((resultado) =>{
         console.log(resultado ? 'Registrado' : 'Erro no registro')
         if(salaTemp){
@@ -218,11 +218,15 @@ const Instrutorsala = withRouter(({history}) => {
                       <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
                       <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
                       <div className="controles-media">
-                        <button onClick={() => (meeting.isAudioMuted() ? unMute(meeting) : mute(meeting))}>Mute/UnMute</button>
-                        {meeting ? meeting.isAudioMuted() ? 'Mudo Ligado' : 'Mudo Desligado' : ''}
+
+                        <button onClick={() => ( muteUnMute(meeting))}>Mute/UnMute</button>
+                        {meeting === {} ? meeting.isAudioMuted() ? 'Mudo Ligado' : 'Mudo Desligado' : ''}
+
                         <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>
-                        {meeting ? meeting.isVideoMuted() ? 'Vídeo Ligado' : 'Vídeo Desligado' : ''}
+                        {meeting === {} ? meeting.isVideoMuted() ? 'Vídeo Ligado' : 'Vídeo Desligado' : ''}
+
                         <button onClick={() => (startScreenSharemeeting(meeting))}>Compartilhar Tela</button>
+
                       </div>
                    </div>
                    <div className="outros-videos">

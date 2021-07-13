@@ -5,8 +5,7 @@ import {
   loginJWT,
   mediaMeeting,
   registrar,
-  mute,
-  unMute,
+  muteUnMute,
   startScreenSharemeeting,
   startStopVideo,
   joinSettingsParticipante,
@@ -76,12 +75,15 @@ useEffect(() =>{
   let webexObj = {}
   let guestToken = localStorage.getItem('authToken')
   const tokenValido = localStorage.getItem('expiration') > (Math.floor(new Date() / 1000))
+  console.log(tokenValido)
 
-  if(!guestToken & tokenValido){
+  if(!guestToken || !tokenValido){
 
-    guestToken = loginJWT(location.state.detail.email,location.state.detail.email)
+    guestToken = loginJWT(location.state.detail.nome)
+  }else{
+    guestToken = localStorage.getItem('authToken')
   }
-
+  console.log(guestToken)
   webexObj = initWebex()
   console.log('teste')
 
@@ -187,10 +189,16 @@ useEffect(() =>{
           <video ref={remotevideoRef} id="remote-video" autoPlay playsInline />
           <audio ref={remoteAudioRef} id="remote-audio" autoPlay />
           <div className="controles-media">
-            <button onClick={() => (meeting.isAudioMuted() ? unMute(meeting) : mute(meeting))}>Mute/UnMute</button>
+
+            <button onClick={() => ( muteUnMute(meeting))}>Mute/UnMute</button>
+            {meeting === {} ? meeting.isAudioMuted() ? 'Mudo Ligado' : 'Mudo Desligado' : ''}
+
             <button onClick={() => (startStopVideo(meeting))}>Mostrar/Esconder Vídeo</button>
+            {meeting === {} ? meeting.isVideoMuted() ? 'Vídeo Ligado' : 'Vídeo Desligado' : ''}
+
             <button onClick={() => (startScreenSharemeeting(meeting))}>Compartilhar Tela</button>
-        </div>
+
+          </div>
       </div>
       <div className="outros-videos">
           <div className="local-video">

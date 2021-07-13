@@ -39,18 +39,22 @@ export async function token(urlToken){
 
 }
 
-export function loginJWT(nome,email){
+export function loginJWT(nome){
   var guestToken = ''
 
   const expiration = Math.floor(new Date() / 1000) + 36000 // 10 hour from now
-  console.log(nome + email)
+  console.log(nome + nome)
+  if(nome === ''){
+    nome = 'Anonymous'
+  }
 
   const payload = {
     "sub": nome,
-    "name": email,
+    "name": nome,
     "iss": process.env.REACT_APP_GUEST_ISSUER_ID,
     "exp": expiration
   };
+  console.log(payload)
 
   const decoded = Buffer.from(process.env.REACT_APP_GUEST_SHARED_SECRET, 'base64');
 
@@ -269,7 +273,30 @@ export function criarMeeting(webex,room){
     });
 }
 
-
+export function muteUnMute(meeting){
+  if(meeting === undefined){
+    console.log('Não há meeting')
+    alert('Não há meeting')
+    return
+  }
+  if(meeting.isAudioMuted()){
+    meeting.unmuteAudio()
+    .then(() => {
+      console.log('MeetingControls#toggleSendAudio() :: Successfully unmuted audio!');
+    })
+    .catch((handleError) => {
+      console.error("erro no unmute" + handleError)
+    });
+  }else{
+    meeting.muteAudio()
+    .then(() => {
+      console.log('MeetingControls#toggleSendAudio() :: Successfully muted audio!');
+    })
+    .catch((handleError) => {
+      console.error("erro no mute" + handleError)
+    });
+  }
+}
 
 export function mute(meeting){
   meeting.muteAudio()

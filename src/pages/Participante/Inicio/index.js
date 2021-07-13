@@ -4,7 +4,7 @@ import { onLoadGetId } from '../../../services/functions'
 
 function ParticipanteInicio(){
 
-  const [email,setEmail] = useState('')
+  const [nome,setNome] = useState('')
   const [room,setRoom] = useState('')
 
   const history = useHistory()
@@ -21,14 +21,14 @@ function ParticipanteInicio(){
   function handleEntrar(){
     history.push({
       pathname: '/participantesala',
-      state: { detail: {"email":email,"sala":room} }
+      state: { detail: {"nome":nome,"sala":room} }
     })
   }
 
   return (
     <div>
       <div>Entrar na Sala</div>
-      <div>Email: <input placeholder="Escreva o email" value={email} onChange={(event) => (setEmail(event.target.value))}></input></div>
+      <div>Nome: <input placeholder="Escreva o nome" value={nome} onChange={(event) => (setNome(event.target.value))}></input></div>
       <div>Room: <input placeholder="Escreva a sala" value={room} onChange={(event) => (setRoom(event.target.value))}></input></div>
 
       <div><button onClick={() => (handleEntrar())}>Entrar</button></div>

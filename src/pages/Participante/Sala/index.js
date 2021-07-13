@@ -50,6 +50,9 @@ function ParticipanteSala(props){
                 const [localStream] = currentMediaStreamsTemp
                 if (localStream) {
                   localvideoRef.current.srcObject = localStream;
+                  setTimeout(function (){
+                    localvideoRef.current.muted = true;
+                  }, 1000)
                 }
 
                 addMediaMeeting(meetingTemp,currentMediaStreamsTemp,mediaSettingsParticipante).then(() =>{
@@ -105,6 +108,12 @@ useEffect(() =>{
     console.log(media)
     switch (media.type) {
       case 'remoteVideo':
+        meeting.setMeetingQuality("HIGH")
+        .then(() => {
+        })
+        .catch((error) => {
+            console.error(error);
+        });
         remotevideoRef.current.srcObject = media.stream;
         break;
       case 'remoteAudio':
@@ -164,6 +173,8 @@ useEffect(() =>{
     }
 
     meeting.leave()
+    webex.meetings.unregister();
+
   }
 
   function FormaMedia(){

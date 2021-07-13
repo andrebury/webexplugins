@@ -104,6 +104,9 @@ const Instrutorsala = withRouter(({history}) => {
           const [localStream] = currentMediaStreamsTemp
           if (localStream) {
             localvideoRef.current.srcObject = localStream;
+            setTimeout(function (){
+              localvideoRef.current.muted = true;
+            }, 1000)
           }
           addMediaMeeting(meetingTemp,currentMediaStreamsTemp,mediaSettingsInstrutor).then(() =>{
             console.log('Media added')
@@ -123,6 +126,12 @@ const Instrutorsala = withRouter(({history}) => {
     switch (media.type) {
       case 'remoteVideo':
         console.log(media)
+        meeting.setMeetingQuality("HIGH")
+        .then(() => {
+        })
+        .catch((error) => {
+            console.error(error);
+        });
         remotevideoRef.current.srcObject = media.stream;
         break;
       case 'remoteAudio':
@@ -172,6 +181,12 @@ const Instrutorsala = withRouter(({history}) => {
     )
   }
 
+  function deixarSala(){
+    meeting.leave()
+    webex.meetings.unregister();
+
+  }
+
   return (
     <div>
     <div>
@@ -182,7 +197,7 @@ const Instrutorsala = withRouter(({history}) => {
        <input ref={addRoomRef} placeholder="Digite o nome da sala" />
        <button onClick={() => (criaSala())}>criar sala</button>
        <button onClick={() => (iniciarReuniao())}>Reunir-se</button>
-       <button onClick={() => (meeting.leave())}>Deixar Sala</button>
+       <button onClick={() => (deixarSala())}>Deixar Sala</button>
        <div/>
           <div className="body-container">
              <div className="membros">

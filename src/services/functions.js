@@ -192,8 +192,13 @@ export const mediaSettingsParticipante = {
 
 //adiciona medias no frontend
 export function mediaMeeting(meeting,mediaSettings,currentMediaStreams){
+  return meeting.getSupportedDevices({sendAudio: mediaSettings.sendAudio, sendVideo: mediaSettings.sendVideo})
+  .then(({sendAudio, sendVideo}) => {
+    const mediaSettingsTemp = mediaSettings
+    mediaSettingsTemp['sendAudio'] = sendAudio
+    mediaSettingsTemp['sendVideo'] = sendVideo
 
-  return meeting.getMediaStreams(mediaSettings).then(([localStream, localShare]) => {
+  return meeting.getMediaStreams(mediaSettingsTemp).then(([localStream, localShare]) => {
     console.log('MeetingControls#getMediaStreams() :: Successfully got following streams', localStream, localShare);
 
     const [currLocalStream, currLocalShare] = currentMediaStreams;
@@ -212,6 +217,7 @@ export function mediaMeeting(meeting,mediaSettings,currentMediaStreams){
 
     return Promise.reject(error);
   });
+})
 }
 
 //envia media para o webex
